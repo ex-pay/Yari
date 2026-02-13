@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>کێ فێڵبازە؟</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a2e;
+            color: #ffffff;
+            padding: 20px;
+            direction: rtl;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            background-color: #2d2d44;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            color: #ff6b6b;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            color: #aaaaaa;
+            font-size: 14px;
+        }
+        
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        .card {
+            background-color: #2d2d44;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #dddddd;
+            font-size: 16px;
+        }
+        
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #1a1a2e;
+            border: 2px solid #444444;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 16px;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .radio-option {
+            flex: 1;
+        }
+        
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+        
+        .radio-option label {
+            display: block;
+            padding: 12px;
+            background-color: #1a1a2e;
+            border: 2px solid #444444;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .radio-option input[type="radio"]:checked + label {
+            background-color: #4ecdc4;
+            border-color: #4ecdc4;
+            color: #000000;
+            font-weight: bold;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #ff6b6b;
+            border: none;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .btn:active {
+            background-color: #ee5a6f;
+        }
+        
+        .btn:disabled {
+            background-color: #555555;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background-color: #4ecdc4;
+        }
+        
+        .btn-secondary:active {
+            background-color: #44a3a0;
+        }
+        
+        .player-list {
+            list-style: none;
+        }
+        
+        .player-item {
+            background-color: #1a1a2e;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .player-item .name {
+            font-size: 16px;
+        }
+        
+        .player-item .remove {
+            background-color: #e74c3c;
+            color: #ffffff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .round-info {
+            text-align: center;
+            font-size: 20px;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #2d2d44;
+            border-radius: 10px;
+        }
+        
+        .spinner {
+            background-color: #2d2d44;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .spinner h2 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        .spinner-wheel {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            border-radius: 50%;
+            border: 8px solid #ff6b6b;
+            background-color: #1a1a2e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+        
+        .spinner-wheel.spinning {
+            animation: spin 0.1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .role-card {
+            background-color: #2d2d44;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .role-card.imposter {
+            background-color: #4a2020;
+            border: 3px solid #ff6b6b;
+        }
+        
+        .role-card.innocent {
+            background-color: #204a40;
+            border: 3px solid #4ecdc4;
+        }
+        
+        .role-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .role-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .role-message {
+            font-size: 18px;
+            color: #cccccc;
+        }
+        
+        .voting-section {
+            margin-top: 20px;
+        }
+        
+        .vote-option {
+            background-color: #2d2d44;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .vote-option:active {
+            background-color: #3d3d54;
+        }
+        
+        .vote-count {
+            background-color: #ff6b6b;
+            color: #ffffff;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .result-card {
+            background-color: #2d2d44;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .result-card h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #4ecdc4;
+        }
+        
+        .scoreboard {
+            background-color: #2d2d44;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .scoreboard h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #444444;
+        }
+        
+        .score-item:last-child {
+            border-bottom: none;
+        }
+        
+        .score-item .name {
+            font-size: 16px;
+        }
+        
+        .score-item .score {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+        
+        .winner {
+            font-size: 22px;
+            color: #ffd700;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #3d3d1a;
+            border-radius: 10px;
+            border: 2px solid #ffd700;
+        }
+        
+        .info-text {
+            color: #aaaaaa;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎭 کێ فێڵبازە؟</h1>
+            <p>Who is the Imposter?</p>
+        </div>
+
+        <!-- Setup Screen -->
+        <div id="setupScreen" class="screen active">
+            <div class="card">
+                <div class="input-group">
+                    <label>ژمارەی راوندەکان:</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="rounds3" name="rounds" value="3">
+                            <label for="rounds3">٣ راوند</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="rounds5" name="rounds" value="5">
+                            <label for="rounds5">٥ راوند</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="roundsFree" name="rounds" value="0" checked>
+                            <label for="roundsFree">ئازاد</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>ناوی یاریزان (٣-١١ کەس):</label>
+                    <input type="text" id="playerNameInput" placeholder="ناوی یاریزان بنووسە...">
+                </div>
+                
+                <button class="btn btn-secondary" onclick="addPlayer()">زیادکردن +</button>
+            </div>
+
+            <div class="card" id="playerListCard" style="display: none;">
+                <h3 style="margin-bottom: 15px;">یاریزانەکان (<span id="playerCount">0</span> کەس)</h3>
+                <ul class="player-list" id="playerList"></ul>
+            </div>
+
+            <button class="btn" id="startGameBtn" onclick="startGame()" disabled>دەستپێکردنی یاری 🎮</button>
+        </div>
+
+        <!-- Spinner Screen -->
+        <div id="spinnerScreen" class="screen">
+            <div class="round-info" id="roundInfo">راوندی ١</div>
+            
+            <div class="spinner">
+                <h2>سوڕانی سپین بۆ دەستپێکەر</h2>
+                <div class="spinner-wheel" id="spinnerWheel">
+                    <span id="currentSpinPlayer">...</span>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" id="spinBtn" onclick="spinWheel()">سوڕاندنی سپین 🎯</button>
+            <button class="btn" id="continueAfterSpinBtn" onclick="showRoles()" style="display: none;">بەردەوامبوون ⬅️</button>
+        </div>
+
+        <!-- Role Reveal Screen -->
+        <div id="roleScreen" class="screen">
+            <div class="round-info" id="roleRoundInfo">راوندی ١</div>
+            
+            <div class="role-card" id="roleCard">
+                <div class="role-icon" id="roleIcon">🎭</div>
+                <div class="role-title" id="roleTitle">کارتەکەت</div>
+                <div class="role-message" id="roleMessage">چاوەڕێ بە...</div>
+            </div>
+
+            <button class="btn" id="roleBtn" onclick="nextRole()">کارتی داهاتوو ➡️</button>
+        </div>
+
+        <!-- Voting Screen -->
+        <div id="votingScreen" class="screen">
+            <div class="round-info" id="votingRoundInfo">راوندی ١</div>
+            
+            <div class="card">
+                <h2 style="margin-bottom: 20px; text-align: center; font-size: 20px;">دەنگدان بۆ فێڵباز</h2>
+                <p class="info-text" style="margin-bottom: 20px;">هەموو یاریزانەکان دەنگ بدەن</p>
+                
+                <div class="voting-section" id="votingOptions"></div>
+            </div>
+
+            <button class="btn" onclick="showVoteResults()">پیشاندانی ئەنجام 📊</button>
+        </div>
+
+        <!-- Vote Results Screen -->
+        <div id="voteResultsScreen" class="screen">
+            <div class="round-info" id="voteResultsRoundInfo">راوندی ١</div>
+            
+            <div class="result-card">
+                <h2>ئەنجامی دەنگدان</h2>
+                <div id="voteResultsContent"></div>
+            </div>
+
+            <div class="scoreboard">
+                <h3>خاڵەکان</h3>
+                <div id="scoreboardContent"></div>
+            </div>
+
+            <button class="btn btn-secondary" id="nextRoundBtn" onclick="nextRound()">راوندی داهاتوو ➡️</button>
+            <button class="btn" id="endGameBtn" onclick="endGame()" style="display: none;">کۆتایی یاری 🏆</button>
+        </div>
+
+        <!-- Final Results Screen -->
+        <div id="finalScreen" class="screen">
+            <div class="result-card">
+                <h2>🏆 کۆتایی یاری 🏆</h2>
+                
+                <div class="winner" id="winnerDisplay"></div>
+                
+                <div class="scoreboard">
+                    <h3>خاڵە کۆتاییەکان:</h3>
+                    <div id="finalScoreboard"></div>
+                </div>
+            </div>
+
+            <button class="btn" onclick="resetGame()">یاریەکی نوێ 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        let players = [];
+        let currentRound = 1;
+        let totalRounds = 0;
+        let currentRoleIndex = 0;
+        let imposterIndex = -1;
+        let scores = {};
+        let votes = {};
+        let firstPlayer = '';
+
+        function addPlayer() {
+            const input = document.getElementById('playerNameInput');
+            const name = input.value.trim();
+            
+            if (name === '') {
+                alert('تکایە ناوێک بنووسە!');
+                return;
+            }
+            
+            if (players.includes(name)) {
+                alert('ئەم ناوە پێشتر زیادکراوە!');
+                return;
+            }
+            
+            if (players.length >= 11) {
+                alert('زۆرترین ژمارە ١١ یاریزانە!');
+                return;
+            }
+            
+            players.push(name);
+            scores[name] = 0;
+            input.value = '';
+            updatePlayerList();
+        }
+
+        function updatePlayerList() {
+            const list = document.getElementById('playerList');
+            const count = document.getElementById('playerCount');
+            const card = document.getElementById('playerListCard');
+            const startBtn = document.getElementById('startGameBtn');
+            
+            list.innerHTML = '';
+            players.forEach((player, index) => {
+                const li = document.createElement('li');
+                li.className = 'player-item';
+                li.innerHTML = `
+                    <span class="name">${index + 1}. ${player}</span>
+                    <button class="remove" onclick="removePlayer(${index})">سڕینەوە</button>
+                `;
+                list.appendChild(li);
+            });
+            
+            count.textContent = players.length;
+            card.style.display = players.length > 0 ? 'block' : 'none';
+            startBtn.disabled = players.length < 3;
+        }
+
+        function removePlayer(index) {
+            const player = players[index];
+            delete scores[player];
+            players.splice(index, 1);
+            updatePlayerList();
+        }
+
+        function startGame() {
+            const selectedRounds = document.querySelector('input[name="rounds"]:checked').value;
+            totalRounds = parseInt(selectedRounds);
+            
+            if (totalRounds === 0) {
+                totalRounds = Infinity;
+            }
+            
+            currentRound = 1;
+            showScreen('spinnerScreen');
+            updateRoundInfo();
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function updateRoundInfo() {
+            const roundText = totalRounds === Infinity ? `راوندی ${currentRound}` : `راوندی ${currentRound} لە ${totalRounds}`;
+            document.getElementById('roundInfo').textContent = roundText;
+            document.getElementById('roleRoundInfo').textContent = roundText;
+            document.getElementById('votingRoundInfo').textContent = roundText;
+            document.getElementById('voteResultsRoundInfo').textContent = roundText;
+        }
+
+        function spinWheel() {
+            const wheel = document.getElementById('spinnerWheel');
+            const playerDisplay = document.getElementById('currentSpinPlayer');
+            const continueBtn = document.getElementById('continueAfterSpinBtn');
+            const spinBtn = document.getElementById('spinBtn');
+            
+            spinBtn.disabled = true;
+            wheel.classList.add('spinning');
+            
+            let spinCount = 0;
+            const maxSpins = 30;
+            
+            const interval = setInterval(() => {
+                const randomPlayer = players[Math.floor(Math.random() * players.length)];
+                playerDisplay.textContent = randomPlayer;
+                spinCount++;
+                
+                if (spinCount >= maxSpins) {
+                    clearInterval(interval);
+                    wheel.classList.remove('spinning');
+                    firstPlayer = randomPlayer;
+                    continueBtn.style.display = 'block';
+                }
+            }, 100);
+        }
+
+        function showRoles() {
+            currentRoleIndex = 0;
+            imposterIndex = Math.floor(Math.random() * players.length);
+            votes = {};
+            players.forEach(player => votes[player] = 0);
+            
+            showScreen('roleScreen');
+            displayRole();
+        }
+
+        function displayRole() {
+            const card = document.getElementById('roleCard');
+            const icon = document.getElementById('roleIcon');
+            const title = document.getElementById('roleTitle');
+            const message = document.getElementById('roleMessage');
+            const btn = document.getElementById('roleBtn');
+            
+            const currentPlayer = players[currentRoleIndex];
+            const isImposter = currentRoleIndex === imposterIndex;
+            
+            card.className = 'role-card ' + (isImposter ? 'imposter' : 'innocent');
+            
+            title.textContent = currentPlayer;
+            
+            if (isImposter) {
+                icon.textContent = '😈';
+                message.textContent = 'تۆ فێڵبازیت!';
+            } else {
+                icon.textContent = '😇';
+                message.textContent = 'تۆ بێتاوانیت!';
+            }
+            
+            if (currentRoleIndex === players.length - 1) {
+                btn.textContent = 'بڕۆ بۆ دەنگدان 🗳️';
+            } else {
+                btn.textContent = 'کارتی داهاتوو ➡️';
+            }
+        }
+
+        function nextRole() {
+            currentRoleIndex++;
+            
+            if (currentRoleIndex >= players.length) {
+                showVotingScreen();
+            } else {
+                displayRole();
+            }
+        }
+
+        function showVotingScreen() {
+            showScreen('votingScreen');
+            
+            const votingOptions = document.getElementById('votingOptions');
+            votingOptions.innerHTML = '';
+            
+            players.forEach(player => {
+                const option = document.createElement('div');
+                option.className = 'vote-option';
+                option.innerHTML = `
+                    <span>${player}</span>
+                    <span class="vote-count" id="voteCount-${player}">٠</span>
+                `;
+                option.onclick = () => voteForPlayer(player);
+                votingOptions.appendChild(option);
+            });
+        }
+
+        function voteForPlayer(player) {
+            votes[player]++;
+            const cleanPlayer = player.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_');
+            const voteElement = document.getElementById('voteCount-' + player);
+            if (voteElement) {
+                voteElement.textContent = votes[player];
+            }
+        }
+
+        function showVoteResults() {
+            showScreen('voteResultsScreen');
+            
+            const resultsContent = document.getElementById('voteResultsContent');
+            const maxVotes = Math.max(...Object.values(votes));
+            const accused = Object.keys(votes).filter(player => votes[player] === maxVotes);
+            
+            let resultHTML = '<div style="margin: 20px 0;">';
+            
+            if (accused.length === 1) {
+                const accusedPlayer = accused[0];
+                const isCorrect = accusedPlayer === players[imposterIndex];
+                
+                if (isCorrect) {
+                    resultHTML += `<p style="font-size: 22px; color: #4ecdc4; margin-bottom: 15px;">✅ راست بوو!</p>`;
+                    resultHTML += `<p style="font-size: 18px;"><strong>${accusedPlayer}</strong> فێڵبازەکە بوو!</p>`;
+                    
+                    players.forEach(player => {
+                        if (player !== accusedPlayer) {
+                            scores[player]++;
+                        }
+                    });
+                } else {
+                    resultHTML += `<p style="font-size: 22px; color: #ff6b6b; margin-bottom: 15px;">❌ هەڵە بوو!</p>`;
+                    resultHTML += `<p style="font-size: 18px;"><strong>${accusedPlayer}</strong> بێتاوان بوو!</p>`;
+                    resultHTML += `<p style="font-size: 18px; margin-top: 10px;">فێڵبازەکە: <strong>${players[imposterIndex]}</strong></p>`;
+                    
+                    scores[players[imposterIndex]]++;
+                }
+            } else {
+                resultHTML += `<p style="font-size: 20px; color: #ffa500;">⚠️ یەکسانی!</p>`;
+                resultHTML += `<p style="font-size: 16px; margin-top: 10px;">فێڵبازەکە: <strong>${players[imposterIndex]}</strong></p>`;
+                
+                scores[players[imposterIndex]]++;
+            }
+            
+            resultHTML += '</div>';
+            resultsContent.innerHTML = resultHTML;
+            
+            updateScoreboard();
+            
+            const nextRoundBtn = document.getElementById('nextRoundBtn');
+            const endGameBtn = document.getElementById('endGameBtn');
+            
+            if (totalRounds !== Infinity && currentRound >= totalRounds) {
+                nextRoundBtn.style.display = 'none';
+                endGameBtn.style.display = 'block';
+            } else {
+                nextRoundBtn.style.display = 'block';
+                endGameBtn.style.display = 'none';
+            }
+        }
+
+        function updateScoreboard() {
+            const content = document.getElementById('scoreboardContent');
+            content.innerHTML = '';
+            
+            const sortedPlayers = [...players].sort((a, b) => scores[b] - scores[a]);
+            
+            sortedPlayers.forEach(player => {
+                const item = document.createElement('div');
+                item.className = 'score-item';
+                item.innerHTML = `
+                    <span class="name">${player}</span>
+                    <span class="score">${scores[player]} خاڵ</span>
+                `;
+                content.appendChild(item);
+            });
+        }
+
+        function nextRound() {
+            currentRound++;
+            updateRoundInfo();
+            showScreen('spinnerScreen');
+            document.getElementById('spinBtn').disabled = false;
+            document.getElementById('continueAfterSpinBtn').style.display = 'none';
+        }
+
+        function endGame() {
+            showScreen('finalScreen');
+            
+            const sortedPlayers = [...players].sort((a, b) => scores[b] - scores[a]);
+            const winner = sortedPlayers[0];
+            const winnerScore = scores[winner];
+            
+            const winners = sortedPlayers.filter(p => scores[p] === winnerScore);
+            
+            let winnerText = '';
+            if (winners.length === 1) {
+                winnerText = `🏆 براوە: ${winner}<br>بە ${winnerScore} خاڵ`;
+            } else {
+                winnerText = `🏆 براوەکان: ${winners.join(' و ')}<br>بە ${winnerScore} خاڵ`;
+            }
+            
+            document.getElementById('winnerDisplay').innerHTML = winnerText;
+            
+            const finalScoreboard = document.getElementById('finalScoreboard');
+            finalScoreboard.innerHTML = '';
+            
+            sortedPlayers.forEach((player, index) => {
+                const item = document.createElement('div');
+                item.className = 'score-item';
+                item.innerHTML = `
+                    <span class="name">${index + 1}. ${player}</span>
+                    <span class="score">${scores[player]} خاڵ</span>
+                `;
+                finalScoreboard.appendChild(item);
+            });
+        }
+
+        function resetGame() {
+            players = [];
+            scores = {};
+            currentRound = 1;
+            totalRounds = 0;
+            currentRoleIndex = 0;
+            imposterIndex = -1;
+            votes = {};
+            firstPlayer = '';
+            
+            document.getElementById('playerNameInput').value = '';
+            updatePlayerList();
+            showScreen('setupScreen');
+        }
+
+        document.getElementById('playerNameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addPlayer();
+            }
+        });
+    </script>
+</body>
+</html>
