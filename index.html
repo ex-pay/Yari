@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KWB - کارت و بەخت</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #e0e0e0; /* ڕەنگی خۆڵەمێشی بۆ بینینی بەشەکان */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* گرنگترین بەش */
+            padding: 0;
+            margin: 0;
+        }
+
+        /* تاسک باڕی سەرەوە */
+        .top-taskbar {
+            height: 80px;
+            background-color: #453E15; /* ڕەنگی زەیتونی */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: white;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #8b7a45;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+            border: 3px solid white;
+        }
+
+        .username {
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .language-icon {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            color: white;
+            border: 2px solid white;
+        }
+
+        /* ناوەڕاست - واڵا */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+        }
+
+        .main-content p {
+            font-size: 24px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        /* تاسک باڕی خوارەوە - بە ڕەنگی جیاواز */
+        .bottom-taskbar {
+            height: 80px;
+            background-color: #c41e3a; /* سوور */
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 10px;
+            color: white;
+            width: 100%;
+            border-top: 4px solid #ffd700; /* زەرد */
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 10px 20px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 30px;
+            min-width: 100px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .nav-item.active {
+            background-color: #ffd700;
+            color: #c41e3a;
+            border: 2px solid white;
+        }
+
+        .nav-icon {
+            font-size: 32px;
+        }
+
+        .leaderboard-badge {
+            background-color: #ffd700;
+            color: #c41e3a;
+            border-radius: 50%;
+            padding: 2px 8px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-left: 5px;
+            border: 2px solid white;
+        }
+
+        /* ڕیزبەندی تایبەت بۆ نیشاندان */
+        .leaderboard-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- تاسک باڕی سەرەوە - زەیتونی -->
+    <div class="top-taskbar">
+        <div class="profile-section">
+            <div class="profile-circle">ک</div>
+            <span class="username">کارت بەخت</span>
+        </div>
+        <div class="language-icon">🌐</div>
+    </div>
+
+    <!-- ناوەڕاست - واڵا -->
+    <div class="main-content">
+        <p>ناوەڕاستی پەڕە</p>
+    </div>
+
+    <!-- تاسک باڕی خوارەوە - سوور -->
+    <div class="bottom-taskbar">
+        <div class="nav-item active">
+            <span class="nav-icon">🏠</span>
+            <span>سەرەکی</span>
+        </div>
+        <div class="nav-item">
+            <span class="nav-icon">🏆</span>
+            <div class="leaderboard-wrapper">
+                <span>ڕێزبەندی</span>
+                <span class="leaderboard-badge">٣</span>
+            </div>
+        </div>
+        <div class="nav-item">
+            <span class="nav-icon">⚙️</span>
+            <span>ڕێکخستن</span>
+        </div>
+    </div>
+
+    <script>
+        // هیچ شتێک نیە - تەنها بۆ تاقیکردنەوە
+        console.log('بەرزی تاسک باڕی سەرەوە:', document.querySelector('.top-taskbar').offsetHeight);
+        console.log('بەرزی تاسک باڕی خوارەوە:', document.querySelector('.bottom-taskbar').offsetHeight);
+        console.log('بەرزی ناوەڕاست:', document.querySelector('.main-content').offsetHeight);
+    </script>
+</body>
+</html>
