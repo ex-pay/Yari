@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#E67960">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>KWB - یاری ژیری</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        :root {
+            --primary-color: #E67960;
+            --primary-dark: #d45a40;
+            --bg-dark: #1a1a1a;
+            --bg-card: #2d2d2d;
+            --text-light: #ffffff;
+            --text-gray: #cccccc;
+            --shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+            --shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.8);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* تاسک باڕی سەرەوە */
+        .taskbar-top {
+            height: 70px;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .profile-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #3498db, #2ecc71, #f1c40f);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .username {
+            font-size: 18px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .language-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 14px;
+            background-color: rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: white;
+            text-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
+        }
+
+        .language-btn:active {
+            transform: scale(0.92);
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* بۆکسی سەردێڕی یاریەکان */
+        .games-header {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            padding: 16px 20px 8px 20px;
+            background: linear-gradient(to bottom, var(--bg-dark) 80%, transparent);
+            z-index: 900;
+        }
+
+        .games-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background-color: var(--primary-color);
+            padding: 8px 24px 8px 20px;
+            border-radius: 40px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .games-badge:active {
+            transform: scale(0.96);
+            background-color: var(--primary-dark);
+        }
+
+        .games-badge-icon {
+            font-size: 22px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .games-badge-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            letter-spacing: 0.5px;
+        }
+
+        /* ناوەڕاستی پەڕە */
+        .main-container {
+            flex: 1;
+            margin-top: 125px;
+            margin-bottom: 70px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* بەشی کارتەکان */
+        .cards-wrapper {
+            flex: 1;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 10px 0 15px 0;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .cards-wrapper::-webkit-scrollbar {
+            display: none;
+        }
+
+        .cards-row {
+            display: flex;
+            gap: 18px;
+            padding: 0 18px;
+            height: 100%;
+            min-height: 320px;
+            align-items: stretch;
+            touch-action: pan-x pinch-zoom;
+        }
+
+        .card-item {
+            min-width: calc(100% - 40px);
+            width: calc(100% - 40px);
+            max-width: 385px; /* 5px زیاد کراوە (لە 380 بۆ 385) */
+            height: 320px;
+            background-color: var(--primary-color);
+            border-radius: 32px;
+            box-shadow: var(--shadow);
+            flex-shrink: 0;
+            scroll-snap-align: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            margin: 0 auto;
+        }
+
+        .card-item:active {
+            transform: scale(0.97);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transition: transform 0.5s ease;
+        }
+
+        .card-item:hover .card-image {
+            transform: scale(1.08);
+        }
+
+        .card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, 
+                rgba(0, 0, 0, 0.95) 0%,
+                rgba(0, 0, 0, 0.7) 50%,
+                transparent 100%);
+            padding: 40px 20px 25px 20px;
+            border-radius: 0 0 32px 32px;
+            backdrop-filter: blur(2px);
+        }
+
+        .card-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            margin-bottom: 6px;
+            line-height: 1.3;
+            text-align: center;
+        }
+
+        /* خاڵەکانی سلاید */
+        .dots-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0 15px 0;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.25);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .dot.active {
+            width: 32px;
+            background-color: var(--primary-color);
+            box-shadow: 0 0 15px rgba(230, 121, 96, 0.4);
+        }
+
+        .dot:active {
+            background-color: rgba(255, 255, 255, 0.5);
+            transform: scale(0.9);
+        }
+
+        /* تاسک باڕی خوارەوە */
+        .taskbar-bottom {
+            height: 70px;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+            padding: 0 12px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .nav-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .nav-button:active {
+            transform: scale(0.85);
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-button.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-6px);
+        }
+
+        .nav-button.active .nav-icon {
+            transform: scale(1.15);
+            text-shadow: 0 0 20px white;
+        }
+
+        .nav-icon {
+            font-size: 28px;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+            transition: all 0.3s ease;
+        }
+
+        .nav-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 22px;
+            height: 3px;
+            background-color: white;
+            border-radius: 3px;
+            box-shadow: 0 0 12px white;
+        }
+
+        /* responsive */
+        @media (max-width: 400px) {
+            .taskbar-top { height: 65px; }
+            .avatar { width: 40px; height: 40px; font-size: 22px; }
+            .username { font-size: 16px; }
+            .language-btn { width: 40px; height: 40px; font-size: 24px; }
+            .games-header { top: 65px; padding: 14px 16px; }
+            .games-badge { padding: 6px 20px 6px 16px; }
+            .games-badge-icon { font-size: 20px; }
+            .games-badge-text { font-size: 16px; }
+            .main-container { margin-top: 115px; margin-bottom: 65px; }
+            .card-item { 
+                height: 280px; 
+                min-width: calc(100% - 32px);
+                max-width: 345px; /* 5px زیاد کراوە (لە 340 بۆ 345) */
+            }
+            .card-title { font-size: 22px; }
+            .taskbar-bottom { height: 65px; }
+            .nav-button { width: 55px; height: 55px; }
+            .nav-icon { font-size: 26px; }
+        }
+
+        /* prevention of blue highlight on tap */
+        .card-item,
+        .nav-button,
+        .language-btn,
+        .games-badge,
+        .dot {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- تاسک باڕی سەرەوە -->
+    <header class="taskbar-top">
+        <div class="profile-area">
+            <div class="avatar">K</div>
+            <span class="username">KWB Gamers</span>
+        </div>
+        <div class="language-btn" onclick="changeLanguage()" aria-label="گۆڕینی زمان">🌐</div>
+    </header>
+
+    <!-- بۆکسی یاریەکان -->
+    <div class="games-header">
+        <div class="games-badge" onclick="scrollToFirstGame()">
+            <span class="games-badge-icon">🎮</span>
+            <span class="games-badge-text">یاریەکان</span>
+        </div>
+    </div>
+
+    <!-- ناوەڕاستی پەڕە - کارتەکان -->
+    <main class="main-container">
+        <div class="cards-wrapper" id="cardsWrapper">
+            <div class="cards-row" id="cardsRow">
+                <!-- کارتی ١: کێ فێڵبازە؟ -->
+                <div class="card-item" onclick="openGame('imposter')">
+                    <img class="card-image" src="https://i.ibb.co/GfdPJJF1/unnamed.jpg" alt="کێ فێڵبازە؟" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">کێ فێڵبازە؟</div>
+                    </div>
+                </div>
+
+                <!-- کارتی ٢: پێم بڵێ -->
+                <div class="card-item" onclick="openGame('tellme')">
+                    <img class="card-image" src="https://i.ibb.co/W4w8ML49/file-00000000bc4c7246985b6ed53f2b431f.png" alt="پێم بڵێ" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">پێم بڵێ</div>
+                    </div>
+                </div>
+
+                <!-- کارتی ٣: پرسیار و وەڵام -->
+                <div class="card-item" onclick="openGame('qa')">
+                    <img class="card-image" src="https://i.ibb.co/xtYC1FLn/file-00000000682872469e958bb29e3734f0.png" alt="پرسیار و وەڵام" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">پرسیار و وەڵام</div>
+                    </div>
+                </div>
+
+                <!-- کارتی ٤: دەست و ئاماژە -->
+                <div class="card-item" onclick="openGame('handsigns')">
+                    <img class="card-image" src="https://i.ibb.co/yBMbb2FS/file-00000000f300724681eb7809c1ee0e01.png" alt="دەست و ئاماژە" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">دەست و ئاماژە</div>
+                    </div>
+                </div>
+
+                <!-- کارتی ٥: پێشبینی بکە -->
+                <div class="card-item" onclick="openGame('predict')">
+                    <img class="card-image" src="https://i.ibb.co/67JbVw0D/sports-betting-design-elements-vector-600nw-2643558951.jpg" alt="پێشبینی بکە" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">پێشبینی بکە</div>
+                    </div>
+                </div>
+
+                <!-- کارتی ٦: کۆنکان -->
+                <div class="card-item" onclick="openGame('concan')">
+                    <img class="card-image" src="https://i.ibb.co/27Tr84PC/51qd-RZYo-Oy-L-AC-UF1000-1000-QL80-FMwebp.webp" alt="کۆنکان" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">کۆنکان</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- خاڵەکانی سلاید -->
+        <div class="dots-container" id="dotsContainer">
+            <span class="dot active"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+    </main>
+
+    <!-- تاسک باڕی خوارەوە -->
+    <footer class="taskbar-bottom">
+        <div class="nav-button active" onclick="navigateTo('home', this)" aria-label="پەڕەی سەرەکی">
+            <span class="nav-icon">🏠</span>
+        </div>
+        <div class="nav-button" onclick="navigateTo('leaderboard', this)" aria-label="ڕیزبەندی">
+            <span class="nav-icon">🏆</span>
+        </div>
+        <div class="nav-button" onclick="navigateTo('settings', this)" aria-label="ڕێکخستنەکان">
+            <span class="nav-icon">⚙️</span>
+        </div>
+    </footer>
+
+    <script>
+        // ڕێکخستنی ناڤیگەیشن
+        function navigateTo(page, element) {
+            // لابردنی active لە هەموو دوگمەکان
+            document.querySelectorAll('.nav-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // زیادکردنی active بە دوگمەی کرتەکراو
+            if (element) {
+                element.classList.add('active');
+            }
+
+            // لە ئایندەدا ڕەوانەکەر بۆ پەڕەکان
+            switch(page) {
+                case 'home':
+                    console.log('گەڕانەوە بۆ سەرەتا');
+                    scrollToFirstGame();
+                    break;
+                case 'leaderboard':
+                    console.log('ڕیزبەندی براوەکان');
+                    alert('ڕیزبەندی براوەکان - بەم زووانە');
+                    break;
+                case 'settings':
+                    console.log('ڕێکخستنەکان');
+                    alert('ڕێکخستنەکان - بەم زووانە');
+                    break;
+            }
+        }
+
+        // کردنەوەی یاریەکان
+        function openGame(gameType) {
+            const gameNames = {
+                'imposter': 'کێ فێڵبازە؟',
+                'tellme': 'پێم بڵێ',
+                'qa': 'پرسیار و وەڵام',
+                'handsigns': 'دەست و ئاماژە',
+                'predict': 'پێشبینی بکە',
+                'concan': 'کۆنکان'
+            };
+
+            const gameName = gameNames[gameType] || gameType;
+            alert(`یاری "${gameName}" - بەم زووانە دەکرێتەوە ✨`);
+        }
+
+        // گۆڕینی زمان
+        function changeLanguage() {
+            alert('🌐 گۆڕینی زمان - دواتر زیاد دەکرێت');
+        }
+
+        // سکرۆڵ کردن بۆ یەکەم کارت
+        function scrollToFirstGame() {
+            const wrapper = document.getElementById('cardsWrapper');
+            if (wrapper) {
+                wrapper.scrollTo({
+                    left: 0,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        // نوێکردنەوەی خاڵەکانی سلاید
+        function updateDots() {
+            const wrapper = document.getElementById('cardsWrapper');
+            const cards = document.querySelectorAll('.card-item');
+            const dots = document.querySelectorAll('.dot');
+            
+            if (!wrapper || cards.length === 0) return;
+
+            const scrollLeft = wrapper.scrollLeft;
+            const cardWidth = cards[0].offsetWidth + 18; // 18px gap
+            
+            let activeIndex = Math.round(scrollLeft / cardWidth);
+            activeIndex = Math.min(activeIndex, dots.length - 1);
+            activeIndex = Math.max(activeIndex, 0);
+            
+            dots.forEach((dot, index) => {
+                if (index === activeIndex) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        // سکرۆڵ کردنی کارتەکان بە کرتەکردنی خاڵەکان
+        function setupDotsClick() {
+            const wrapper = document.getElementById('cardsWrapper');
+            const cards = document.querySelectorAll('.card-item');
+            const dots = document.querySelectorAll('.dot');
+            
+            if (!wrapper || cards.length === 0) return;
+
+            const scrollToCard = (index) => {
+                const cardWidth = cards[0].offsetWidth + 18;
+                wrapper.scrollTo({
+                    left: cardWidth * index,
+                    behavior: 'smooth'
+                });
+            };
+
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    scrollToCard(index);
+                });
+                
+                dot.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    scrollToCard(index);
+                }, { passive: false });
+            });
+        }
+
+        // ڕووداوەکانی سکرۆڵ
+        function setupScrollEvents() {
+            const wrapper = document.getElementById('cardsWrapper');
+            if (!wrapper) return;
+
+            wrapper.addEventListener('scroll', () => {
+                requestAnimationFrame(updateDots);
+            }, { passive: true });
+        }
+
+        // بەڕێوەبردنی قەبارەی شاشە
+        function handleResize() {
+            updateDots();
+            setupDotsClick();
+        }
+
+        // ڕێگری لە سکرۆڵی لاپەڕە کاتێک لەسەر کارتەکان سکرۆڵ دەکەیت
+        function preventPageScroll() {
+            const wrapper = document.getElementById('cardsWrapper');
+            if (!wrapper) return;
+
+            wrapper.addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+            }, { passive: true });
+        }
+
+        // جێبەجێکردنی هەموو فانکشنەکان کە پەڕەکە بار دەبێت
+        window.addEventListener('load', () => {
+            updateDots();
+            setupDotsClick();
+            setupScrollEvents();
+            preventPageScroll();
+        });
+
+        window.addEventListener('resize', () => {
+            handleResize();
+        });
+
+        // پاڵاوتن بۆ ئەندروید/ئایفۆن
+        document.addEventListener('touchmove', (e) => {
+            if (e.target.closest('.cards-wrapper')) {
+                e.stopPropagation();
+            }
+        }, { passive: true });
+    </script>
+</body>
+</html>
