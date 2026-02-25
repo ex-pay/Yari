@@ -1,0 +1,4335 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#F87158">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>KWB - یاری ژیری</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        :root {
+            --primary-color: #F87158;
+            --primary-dark: #d45a40;
+            --bg-dark: #1a1a1a;
+            --text-light: #ffffff;
+            --shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+            --shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.8);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            -webkit-touch-callout: none;
+        }
+
+        /* ===== تاسک باڕی سەرەوە ===== */
+        .taskbar-top {
+            height: 70px;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+        .taskbar-top.black {
+            background-color: #000000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .taskbar-top.hidden {
+            display: none;
+        }
+
+        .profile-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #3498db, #2ecc71, #f1c40f);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .username {
+            font-size: 18px;
+            font-weight: 500;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .back-btn {
+            width: auto;
+            height: auto;
+            background-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--primary-color);
+            font-weight: 1000;
+            border: none;
+            transform: scaleX(-1);
+            text-shadow: 0 0 8px rgba(248, 113, 88, 0.6);
+            line-height: 1;
+        }
+        .back-btn:active {
+            transform: scaleX(-1) scale(0.9);
+            opacity: 0.8;
+        }
+
+        .main-container {
+            position: fixed;
+            top: 70px;
+            bottom: 70px;
+            left: 0;
+            right: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 2% 16px 2% 16px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        .main-container.no-bottom-bar {
+            bottom: 0;
+            padding-bottom: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+        .main-container.with-bottom-bar {
+            bottom: 70px;
+        }
+        .main-container.fullscreen {
+            top: 0;
+            bottom: 0;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding-bottom: 20px;
+        }
+        .card-item {
+            width: 100%;
+            aspect-ratio: 1 / 1.1;
+            background-color: var(--primary-color);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        .card-item:active {
+            transform: scale(0.97);
+            box-shadow: var(--shadow-hover);
+        }
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transition: transform 0.5s ease;
+        }
+        .card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, 
+                rgba(0, 0, 0, 0.95) 0%,
+                rgba(0, 0, 0, 0.7) 50%,
+                transparent 100%);
+            padding: 30px 12px 15px 12px;
+            border-radius: 0 0 24px 24px;
+            backdrop-filter: blur(2px);
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            line-height: 1.3;
+            text-align: center;
+        }
+
+        .leaderboard-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px 0;
+        }
+        .settings-box {
+            height: 240px;
+            background-color: var(--primary-color);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            overflow: hidden;
+        }
+        .settings-box:active {
+            transform: scale(0.96);
+            box-shadow: var(--shadow-hover);
+        }
+        .settings-icon {
+            height: 75%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 90px;
+            background-color: var(--primary-dark);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            transition: all 0.3s ease;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .settings-box:active .settings-icon {
+            background-color: #c24e35;
+        }
+        .settings-text {
+            height: 25%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            background-color: var(--primary-color);
+            padding: 0 5px;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .imposter-page {
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .video-section {
+            height: 50%;
+            width: 100%;
+            background-color: #0a0a0a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: none;
+            transition: height 0.05s linear;
+            overflow: hidden;
+        }
+        .youtube-player {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .instructions-section {
+            position: relative;
+            width: 100%;
+            background-color: var(--primary-color);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 25px 20px 30px 20px;
+            border-top: none;
+            transition: height 0.05s linear;
+            height: 50%;
+            top: 0;
+            color: white;
+            border-top-left-radius: 35px;
+            border-top-right-radius: 35px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .instructions-section::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            background: transparent;
+        }
+        
+        .instructions-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .instructions-list {
+            list-style: none;
+        }
+        .instructions-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 22px;
+            font-size: 19px;
+            line-height: 1.7;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .bullet {
+            min-width: 34px;
+            height: 34px;
+            background-color: rgba(0, 0, 0, 0.25);
+            border-radius: 17px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 3px 0 rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 17px;
+        }
+
+        .imposter-bottom-bar {
+            height: 70px;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+            padding: 0 20px;
+        }
+
+        .bottom-next-btn {
+            background-color: #B85C3A;
+            color: white;
+            font-size: 26px;
+            font-weight: 700;
+            padding: 12px 45px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            letter-spacing: 1px;
+            border-radius: 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .bottom-next-btn:active {
+            transform: scale(0.97);
+            opacity: 0.9;
+        }
+
+        .taskbar-bottom {
+            height: 70px;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+            padding: 0 12px;
+        }
+        .nav-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .nav-button:active {
+            transform: scale(0.85);
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+        .nav-button.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-6px);
+        }
+        .nav-button.active .nav-icon {
+            transform: scale(1.15);
+            text-shadow: 0 0 20px white;
+        }
+        .nav-icon {
+            font-size: 28px;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+            transition: all 0.3s ease;
+        }
+        .nav-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 22px;
+            height: 3px;
+            background-color: white;
+            border-radius: 3px;
+            box-shadow: 0 0 12px white;
+        }
+
+        .game-play-page {
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            display: flex;
+            flex-direction: column;
+            padding: 15px 16px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            background: linear-gradient(145deg, #111, #1a1a1a);
+            border-radius: 20px;
+            border-right: 5px solid var(--primary-color);
+            flex-shrink: 0;
+        }
+
+        .category-header-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .category-select-all {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: rgba(248, 113, 88, 0.2);
+            padding: 6px 15px;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+        
+        .category-select-all input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+        
+        .category-select-all span {
+            font-size: 16px;
+            color: white;
+        }
+
+        .horizontal-scroll {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            white-space: nowrap;
+            padding: 5px 0 15px 0;
+            margin-bottom: 15px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) #333;
+            flex-shrink: 0;
+        }
+
+        .horizontal-scroll::-webkit-scrollbar {
+            height: 5px;
+        }
+        .horizontal-scroll::-webkit-scrollbar-track {
+            background: #333;
+            border-radius: 10px;
+        }
+        .horizontal-scroll::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 10px;
+        }
+
+        .category-boxes {
+            display: inline-flex;
+            gap: 12px;
+            padding: 0 5px;
+        }
+
+        .category-box {
+            width: 110px;
+            height: 130px;
+            background: linear-gradient(145deg, #1a1a1a, #222);
+            border-radius: 18px;
+            overflow: hidden;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 4px 0 #B85C3A;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            opacity: 0.5;
+        }
+        .category-box.selected {
+            opacity: 1;
+            border-color: #4CAF50;
+            box-shadow: 0 4px 0 #2d6a2d;
+        }
+        .category-box:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #B85C3A;
+        }
+
+        .category-icon {
+            height: 80%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 45px;
+            background: linear-gradient(145deg, #222, #2a2a2a);
+        }
+
+        .category-name {
+            height: 20%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            background-color: var(--primary-color);
+            padding: 3px;
+            text-align: center;
+            white-space: normal;
+            line-height: 1.2;
+        }
+
+        .game-settings-card {
+            width: 100%;
+            background: linear-gradient(145deg, #111, #1a1a1a);
+            border-radius: 25px;
+            padding: 18px 16px;
+            margin-bottom: 15px;
+            border: 2px solid var(--primary-color);
+            flex-shrink: 0;
+        }
+
+        .settings-card-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 12px;
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 18px;
+            border-right: 4px solid var(--primary-color);
+        }
+
+        .setting-text {
+            flex: 1;
+            font-size: 14px;
+            color: white;
+            line-height: 1.4;
+            margin-left: 12px;
+        }
+        
+        .setting-text strong {
+            color: var(--primary-color);
+            font-size: 15px;
+        }
+
+        .toggle-btn {
+            min-width: 60px;
+            width: 60px;
+            height: 32px;
+            background-color: #4CAF50;
+            border-radius: 30px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 0 #2d6a2d;
+            border: none;
+        }
+        .toggle-btn.off {
+            background-color: #666;
+            box-shadow: 0 2px 0 #444;
+        }
+        .toggle-btn::after {
+            content: '';
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            background-color: white;
+            border-radius: 26px;
+            top: 3px;
+            right: 3px;
+            transition: all 0.3s ease;
+        }
+        .toggle-btn.off::after {
+            right: 31px;
+        }
+
+        .start-game-btn {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            padding: 15px 0;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 5px 0 #B85C3A;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .start-game-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #B85C3A;
+        }
+
+        /* ===== پەڕەی دیکتەیتەر (پەڕەی نیشاندانی کارتەکان) ===== */
+        .dictator-page {
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 16px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .game-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 10px rgba(248, 113, 88, 0.3);
+            flex-shrink: 0;
+        }
+
+        /* کۆنتەینەری هەردوو بۆکسەکە */
+        .cards-container {
+            position: relative;
+            width: 100%;
+            height: 350px; /* بۆ مۆبایل */
+            margin-bottom: 20px;
+            flex-shrink: 0;
+            background-color: transparent;
+            border-radius: 30px;
+            overflow: hidden;
+        }
+
+        /* بۆکسی کارتەکان (لە ژێرەوە) - ڕەش و چوارچێوەی پرتەقاڵی */
+        .card-display {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            border-radius: 30px;
+            padding: 20px;
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 8px 0 #B85C3A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        .card-content {
+            text-align: center;
+            width: 100%;
+        }
+
+        .card-category {
+            font-size: 20px;
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+
+        .card-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        /* ===== وێنەی فێڵباز (لە لینکی نوێ) ===== */
+        .spy-image-container {
+            width: 100%;
+            height: 180px;
+            position: relative;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .spy-image {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            object-fit: contain;
+        }
+
+        /* بۆکسی ناوی یاریزانەکان (لە سەرەوە) - پاشبنەمای پرتەقاڵی */
+        .player-card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 30px;
+            padding: 25px;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 8px 0 #B85C3A;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.1s ease-out;
+            z-index: 10;
+            cursor: grab;
+            transform: translateY(0);
+            will-change: transform;
+        }
+
+        .player-name {
+            font-size: 32px;
+            font-weight: 800;
+            color: white;
+            text-align: center;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .player-action {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .swipe-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        
+        .arrow-up {
+            font-size: 30px;
+            color: white;
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* کۆنتەینەری بەشی خوارەوە */
+        .bottom-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: auto;
+            flex-shrink: 0;
+        }
+
+        /* دوگمەی قفڵ */
+        .lock-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            background-color: #333;
+            border: 2px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 0 #B85C3A;
+            flex-shrink: 0;
+        }
+        .lock-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #B85C3A;
+        }
+        .lock-btn.locked {
+            background-color: var(--primary-color);
+        }
+
+        /* دوگمەی ناڤیگەیشن */
+        .nav-button-card {
+            flex: 1;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            padding: 15px 0;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 0 #2d6a2d;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .nav-button-card:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #2d6a2d;
+        }
+        .nav-button-card.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            background-color: #666;
+            box-shadow: 0 6px 0 #444;
+        }
+
+        /* ===== پەڕەی چەرخ (Spin) ===== */
+        .spin-page {
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 16px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .spin-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 10px 0 30px;
+            width: 100%;
+        }
+
+        .spin-header {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .spin-subheader {
+            font-size: 18px;
+            font-weight: 400;
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .spin-wheel-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto 20px;
+        }
+
+        .spin-wheel {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), 0 0 0 5px var(--primary-color), 0 0 0 8px rgba(248, 113, 88, 0.3);
+            transition: transform 0.05s linear;
+            cursor: grab;
+            overflow: hidden;
+        }
+
+        .spin-wheel:active {
+            cursor: grabbing;
+        }
+
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background-color: #333;
+            border-radius: 50%;
+            border: 4px solid var(--primary-color);
+            z-index: 20;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid var(--primary-color);
+            z-index: 25;
+            filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.5));
+        }
+
+        .segment-text {
+            position: absolute;
+            width: 70px;
+            height: 25px;
+            left: 50%;
+            top: 50%;
+            transform-origin: 0 0;
+            color: white;
+            font-weight: 700;
+            font-size: 12px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .result-box {
+            width: 100%;
+            max-width: 300px;
+            background: linear-gradient(145deg, #222, #2a2a2a);
+            border-radius: 30px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 2px solid var(--primary-color);
+            text-align: center;
+        }
+
+        .result-label {
+            font-size: 16px;
+            color: #aaa;
+            margin-bottom: 8px;
+        }
+
+        .result-name {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-shadow: 0 2px 10px rgba(248, 113, 88, 0.3);
+        }
+
+        .spin-start-btn {
+            width: 100%;
+            max-width: 300px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            padding: 15px 0;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 0 #2d6a2d;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .spin-start-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #2d6a2d;
+        }
+
+        /* ===== پەڕەی یاری (Game Page) ===== */
+        .game-page {
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .game-timer-section {
+            height: 35%;
+            width: 100%;
+            background: linear-gradient(145deg, #0a0a0a, #1a1a1a);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .timer-display {
+            font-size: 80px;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-shadow: 0 0 20px rgba(248, 113, 88, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .timer-label {
+            font-size: 18px;
+            color: #aaa;
+        }
+
+        .game-controls-section {
+            height: 65%;
+            width: 100%;
+            background-color: #000000;
+            padding: 20px 16px;
+            overflow-y: auto;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .control-box {
+            aspect-ratio: 1 / 1;
+            background: linear-gradient(145deg, #222, #2a2a2a);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid var(--primary-color);
+            padding: 15px;
+            text-align: center;
+        }
+        .control-box:active {
+            transform: scale(0.95);
+            background: linear-gradient(145deg, #2a2a2a, #333);
+        }
+        .control-box.paused {
+            background-color: #4CAF50;
+            border-color: #4CAF50;
+        }
+
+        .control-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .control-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            line-height: 1.3;
+        }
+
+        /* ===== پەڕەی ئاشکراکردن (Reveal Page) ===== */
+        .reveal-page {
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .reveal-message {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .reveal-name {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 40px;
+            text-shadow: 0 2px 10px rgba(248, 113, 88, 0.5);
+        }
+
+        .reveal-points-btn {
+            width: 100%;
+            max-width: 350px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            padding: 18px 0;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 0 #2d6a2d;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .reveal-points-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #2d6a2d;
+        }
+
+        /* ===== دیالۆگی خاڵەکان (Points Dialog) ===== */
+        .points-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 4000;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .points-dialog-content {
+            width: 100%;
+            max-width: 450px;
+            background: linear-gradient(145deg, #222, #2a2a2a);
+            border-radius: 30px;
+            padding: 30px 25px;
+            border: 2px solid var(--primary-color);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .points-dialog-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .points-dialog-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .points-dialog-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: linear-gradient(145deg, #2a2a2a, #333);
+            border-radius: 20px;
+            padding: 12px 20px;
+            border: 1px solid var(--primary-color);
+        }
+
+        .points-dialog-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 23px;
+            background: linear-gradient(145deg, #3498db, #2ecc71);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .points-dialog-name {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .points-dialog-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary-color);
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .points-dialog-footer {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .points-dialog-close {
+            width: 100%;
+            max-width: 200px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            padding: 15px 0;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 0 #2d6a2d;
+            text-align: center;
+        }
+        .points-dialog-close:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* ===== پەڕەی دەستی پێکردن (Game Started) ===== */
+        .game-started-page {
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .game-started-content {
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .game-started-title {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-shadow: 0 4px 15px rgba(248, 113, 88, 0.5);
+        }
+
+        .game-started-message {
+            font-size: 28px;
+            font-weight: 600;
+            color: #aaa;
+            margin-bottom: 40px;
+        }
+
+        .game-started-winner {
+            font-size: 42px;
+            font-weight: 800;
+            color: #4CAF50;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(145deg, #1a2a2a, #1f3333);
+            border-radius: 30px;
+            border: 2px solid #4CAF50;
+        }
+
+        /* ===== دیالۆگی دڵنیابوون ===== */
+        .confirm-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            padding: 20px;
+        }
+
+        .confirm-content {
+            width: 100%;
+            max-width: 350px;
+            background: linear-gradient(145deg, #222, #2a2a2a);
+            border-radius: 30px;
+            padding: 30px 25px;
+            border: 2px solid var(--primary-color);
+            text-align: center;
+        }
+
+        .confirm-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .confirm-message {
+            font-size: 18px;
+            color: white;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .confirm-btn {
+            flex: 1;
+            padding: 15px;
+            font-size: 20px;
+            font-weight: 700;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .confirm-btn.yes {
+            background-color: #F44336;
+            color: white;
+            box-shadow: 0 5px 0 #B33A30;
+        }
+        .confirm-btn.no {
+            background-color: #4CAF50;
+            color: white;
+            box-shadow: 0 5px 0 #2d6a2d;
+        }
+        .confirm-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #B33A30;
+        }
+        .confirm-btn.no:active {
+            box-shadow: 0 1px 0 #2d6a2d;
+        }
+
+        /* ===== پەڕەی دەستپێکردن ===== */
+        .start-final-page {
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .start-final-content {
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .start-final-title {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-shadow: 0 4px 15px rgba(248, 113, 88, 0.5);
+        }
+
+        .start-final-message {
+            font-size: 32px;
+            font-weight: 600;
+            color: #aaa;
+            margin-bottom: 40px;
+        }
+
+        .loading-dots {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .dot {
+            width: 20px;
+            height: 20px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+
+        .next-step-page {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #0a0a0a, #1a1a1a);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px 16px 30px 16px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .game-info-card {
+            width: 100%;
+            max-width: 500px;
+            background: linear-gradient(145deg, #222, #2a2a2a);
+            border-radius: 30px;
+            padding: 25px 20px;
+            margin-bottom: 25px;
+            border: 1px solid var(--primary-color);
+            box-shadow: 0 10px 0 #B85C3A;
+        }
+
+        .game-info-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .game-info-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 18px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            border-right: 5px solid var(--primary-color);
+        }
+
+        .game-info-icon {
+            font-size: 32px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .game-info-text {
+            font-size: 18px;
+            color: white;
+            line-height: 1.5;
+        }
+
+        .game-info-text span {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .warning-card {
+            width: 100%;
+            max-width: 500px;
+            background: linear-gradient(145deg, #2a1a1a, #331f1f);
+            border-radius: 30px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 2px solid #B85C3A;
+        }
+
+        .warning-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #B85C3A;
+            margin-bottom: 15px;
+        }
+
+        .warning-list {
+            list-style: none;
+        }
+
+        .warning-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 15px;
+            font-size: 17px;
+            color: #ddd;
+        }
+
+        .warning-bullet {
+            min-width: 24px;
+            height: 24px;
+            background-color: #B85C3A;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: white;
+            font-size: 14px;
+        }
+
+        .players-card {
+            width: 100%;
+            max-width: 500px;
+            background: linear-gradient(145deg, #1a2a2a, #1f3333);
+            border-radius: 30px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 2px solid #4CAF50;
+        }
+
+        .players-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .player-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 16px;
+            padding: 12px 15px;
+            border: 1px solid #4CAF50;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .player-item:active {
+            transform: scale(0.98);
+            background-color: rgba(76, 175, 80, 0.2);
+        }
+
+        .player-avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            background: linear-gradient(145deg, #3498db, #2ecc71);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .player-name-text {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .player-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .player-action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 18px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .player-action-btn.edit {
+            background-color: #FFC107;
+            color: #000;
+            box-shadow: 0 3px 0 #B78B1A;
+        }
+        .player-action-btn.delete {
+            background-color: #F44336;
+            color: white;
+            box-shadow: 0 3px 0 #B33A30;
+        }
+        .player-action-btn:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        .add-player-btn {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            padding: 15px;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 5px 0 #2d6a2d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .add-player-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #2d6a2d;
+        }
+
+        .action-buttons {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 20px;
+        }
+
+        .primary-btn {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            padding: 18px 0;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 0 #B85C3A;
+            text-align: center;
+        }
+        .primary-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #B85C3A;
+        }
+
+        .player-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .dialog-content {
+            width: 100%;
+            max-width: 400px;
+            background: linear-gradient(145deg, #222, #2a2a2a);
+            border-radius: 30px;
+            padding: 30px 25px;
+            border: 2px solid var(--primary-color);
+        }
+
+        .dialog-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .dialog-input {
+            width: 100%;
+            padding: 18px 20px;
+            font-size: 18px;
+            background-color: #333;
+            border: 2px solid var(--primary-color);
+            border-radius: 20px;
+            color: white;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .dialog-input:focus {
+            outline: none;
+            border-color: #B85C3A;
+        }
+
+        .dialog-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .dialog-btn {
+            flex: 1;
+            padding: 15px;
+            font-size: 20px;
+            font-weight: 700;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .dialog-btn.confirm {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 5px 0 #B85C3A;
+        }
+        .dialog-btn.cancel {
+            background-color: #555;
+            color: white;
+            box-shadow: 0 5px 0 #333;
+        }
+        .dialog-btn.delete {
+            background-color: #F44336;
+            color: white;
+            box-shadow: 0 5px 0 #B33A30;
+        }
+        .dialog-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #B85C3A;
+        }
+        .dialog-btn.cancel:active {
+            box-shadow: 0 1px 0 #333;
+        }
+        .dialog-btn.delete:active {
+            box-shadow: 0 1px 0 #B33A30;
+        }
+
+        .error-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2500;
+            padding: 20px;
+        }
+
+        .error-content {
+            width: 100%;
+            max-width: 350px;
+            background: linear-gradient(145deg, #442222, #552222);
+            border-radius: 30px;
+            padding: 30px 25px;
+            border: 2px solid #F44336;
+            text-align: center;
+        }
+
+        .error-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            font-size: 20px;
+            color: white;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .error-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            font-weight: 700;
+            background-color: #F44336;
+            color: white;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #B33A30;
+        }
+        .error-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #B33A30;
+        }
+
+        /* responsive */
+        @media (min-width: 481px) {
+            .cards-container {
+                height: 470px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .taskbar-top { height: 65px; }
+            .taskbar-bottom { height: 65px; }
+            .imposter-bottom-bar { height: 65px; }
+            .avatar { width: 40px; height: 40px; font-size: 22px; }
+            .username { font-size: 16px; }
+            .back-btn { font-size: 38px; font-weight: 1000; }
+            .main-container { top: 65px; bottom: 65px; padding: 2% 12px 2% 12px; }
+            .main-container.with-bottom-bar { bottom: 65px; }
+            .cards-grid { gap: 12px; }
+            .card-title { font-size: 16px; padding: 0 2px; }
+            .card-overlay { padding: 25px 8px 12px 8px; }
+            .nav-button { width: 50px; height: 50px; }
+            .nav-icon { font-size: 24px; }
+            .settings-box { height: 200px; }
+            .settings-icon { font-size: 70px; }
+            .settings-text { font-size: 14px; }
+            .instructions-section { padding: 20px 15px 25px 15px; border-top-left-radius: 35px; border-top-right-radius: 35px; }
+            .instructions-title { font-size: 24px; }
+            .instructions-list li { font-size: 17px; gap: 12px; }
+            .bullet { min-width: 30px; height: 30px; font-size: 15px; }
+            .bottom-next-btn { font-size: 22px; padding: 10px 35px; }
+            
+            .game-play-page { padding: 12px 12px; }
+            .category-header { padding: 10px 12px; }
+            .category-header-text { font-size: 16px; }
+            .category-select-all { padding: 4px 12px; }
+            .category-select-all span { font-size: 14px; }
+            .category-box { width: 90px; height: 110px; }
+            .category-icon { font-size: 35px; }
+            .category-name { font-size: 11px; }
+            .game-settings-card { padding: 15px; }
+            .settings-card-title { font-size: 20px; }
+            .setting-item { padding: 10px; }
+            .setting-text { font-size: 13px; }
+            .setting-text strong { font-size: 14px; }
+            .toggle-btn { min-width: 55px; width: 55px; height: 30px; }
+            .toggle-btn::after { width: 24px; height: 24px; top: 3px; right: 3px; }
+            .toggle-btn.off::after { right: 28px; }
+            .start-game-btn { font-size: 20px; padding: 12px 0; }
+            
+            .dictator-page { padding: 15px 12px; }
+            .game-title { font-size: 32px; margin-bottom: 25px; }
+            .cards-container { height: 350px; }
+            .player-card { padding: 20px; }
+            .player-name { font-size: 24px; }
+            .player-action { font-size: 18px; }
+            .card-value { font-size: 28px; }
+            .spy-image-container { height: 150px; }
+            .lock-btn { width: 50px; height: 50px; font-size: 24px; }
+            .nav-button-card { font-size: 18px; padding: 12px 0; }
+            
+            .start-final-title { font-size: 36px; }
+            .start-final-message { font-size: 24px; }
+            
+            .game-info-title { font-size: 24px; }
+            .game-info-text { font-size: 16px; }
+            .warning-title { font-size: 22px; }
+            .warning-list li { font-size: 15px; }
+            .players-title { font-size: 22px; }
+            .player-name-text { font-size: 16px; }
+            .player-action-btn { width: 32px; height: 32px; font-size: 16px; }
+            .add-player-btn { font-size: 18px; }
+            .dialog-title { font-size: 22px; }
+            .dialog-input { font-size: 16px; padding: 15px; }
+            .dialog-btn { font-size: 18px; padding: 12px; }
+            .primary-btn { font-size: 22px; padding: 15px 0; }
+
+            .spin-header { font-size: 24px; }
+            .spin-subheader { font-size: 16px; }
+            .result-name { font-size: 28px; }
+            .spin-start-btn { font-size: 20px; padding: 15px 0; }
+            .game-started-title { font-size: 28px; }
+            .game-started-message { font-size: 22px; }
+            .game-started-winner { font-size: 32px; }
+            .timer-display { font-size: 60px; }
+            .control-icon { font-size: 36px; }
+            .control-text { font-size: 14px; }
+            .point-name { font-size: 18px; }
+            .point-value { font-size: 24px; }
+            .point-btn { width: 35px; height: 35px; font-size: 20px; }
+            .points-dialog-btn { width: 35px; height: 35px; font-size: 20px; }
+            .points-dialog-name { min-width: 80px; font-size: 16px; }
+        }
+
+        .card-item, .nav-button, .settings-box, .back-btn, .bottom-next-btn, 
+        .video-section, .primary-btn, .add-player-btn, .dialog-btn, .player-item,
+        .player-action-btn, .category-box, .toggle-btn, .start-game-btn, .nav-button-card, 
+        .player-card, .lock-btn, .confirm-btn, .spin-wheel, .control-box, .point-item,
+        .point-btn, .points-dialog-btn, .reveal-points-btn, .points-dialog-close {
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <!-- ========== تاسک باڕی سەرەوەی گشتی ========== -->
+    <header class="taskbar-top" id="mainTaskbar">
+        <div id="taskbarContent"></div>
+    </header>
+
+    <!-- ========== ناوەڕاستی پەڕە ========== -->
+    <main class="main-container" id="mainContainer">
+        <!-- پەڕەی یاریەکان -->
+        <div id="gamesPage">
+            <div class="cards-grid">
+                <!-- کارتی ١: کێ فێڵبازە؟ -->
+                <div class="card-item" onclick="openImposterPage()">
+                    <img class="card-image" src="https://i.ibb.co/GfdPJJF1/unnamed.jpg" alt="کێ فێڵبازە؟" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">کێ فێڵبازە؟</div>
+                    </div>
+                </div>
+                <!-- کارتی ٢: پێم بڵێ -->
+                <div class="card-item" onclick="openGame('tellme')">
+                    <img class="card-image" src="https://i.ibb.co/W4w8ML49/file-00000000bc4c7246985b6ed53f2b431f.png" alt="پێم بڵێ" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">پێم بڵێ</div>
+                    </div>
+                </div>
+                <!-- کارتی ٣: پرسیار و وەڵام -->
+                <div class="card-item" onclick="openGame('qa')">
+                    <img class="card-image" src="https://i.ibb.co/xtYC1FLn/file-00000000682872469e958bb29e3734f0.png" alt="پرسیار و وەڵام" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">پرسیار و وەڵام</div>
+                    </div>
+                </div>
+                <!-- کارتی ٤: دەست و ئاماژە -->
+                <div class="card-item" onclick="openGame('handsigns')">
+                    <img class="card-image" src="https://i.ibb.co/yBMbb2FS/file-00000000f300724681eb7809c1ee0e01.png" alt="دەست و ئاماژە" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">دەست و ئاماژە</div>
+                    </div>
+                </div>
+                <!-- کارتی ٥: پێشبینی بکە -->
+                <div class="card-item" onclick="openGame('predict')">
+                    <img class="card-image" src="https://i.ibb.co/67JbVw0D/sports-betting-design-elements-vector-600nw-2643558951.jpg" alt="پێشبینی بکە" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">پێشبینی بکە</div>
+                    </div>
+                </div>
+                <!-- کارتی ٦: کۆنکان -->
+                <div class="card-item" onclick="openGame('concan')">
+                    <img class="card-image" src="https://i.ibb.co/27Tr84PC/51qd-RZYo-Oy-L-AC-UF1000-1000-QL80-FMwebp.webp" alt="کۆنکان" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">کۆنکان</div>
+                    </div>
+                </div>
+                <!-- کارتی ٧: تاوڵە -->
+                <div class="card-item" onclick="openGame('tawle')">
+                    <img class="card-image" src="https://i.ibb.co/bjpjPDDf/620b5c911ee82.jpg" alt="تاوڵە" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">تاوڵە</div>
+                    </div>
+                </div>
+                <!-- کارتی ٨: مۆنۆپۆلی -->
+                <div class="card-item" onclick="openGame('monopoly')">
+                    <img class="card-image" src="https://i.ibb.co/LdhTdgQb/FB-IMG-1771294123386.jpg" alt="مۆنۆپۆلی" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">مۆنۆپۆلی</div>
+                    </div>
+                </div>
+                <!-- کارتی ٩: ئێکس و ئۆ -->
+                <div class="card-item" onclick="openGame('x_o')">
+                    <img class="card-image" src="https://i.ibb.co/8DzCXwL6/file-000000009cfc72439e02c604fe1af03b.png" alt="ئێکس و ئۆ" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">ئێکس و ئۆ</div>
+                    </div>
+                </div>
+                <!-- کارتی ١٠: دامە -->
+                <div class="card-item" onclick="openGame('dame')">
+                    <img class="card-image" src="https://i.ibb.co/zTd9zMXw/file-00000000243c71f6b47374e38b8cfa82.png" alt="دامە" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">دامە</div>
+                    </div>
+                </div>
+                <!-- کارتی ١١: دۆمینە -->
+                <div class="card-item" onclick="openGame('domine')">
+                    <img class="card-image" src="https://i.ibb.co/9HJS3zmw/file-00000000541872438cef6e26c9387684.png" alt="دۆمینە" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">دۆمینە</div>
+                    </div>
+                </div>
+                <!-- کارتی ١٢: ئونۆ -->
+                <div class="card-item" onclick="openGame('uno')">
+                    <img class="card-image" src="https://i.ibb.co/hx0bpFwC/uno-pc-game-ubisoft-connect-cover.jpg" alt="ئونۆ" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-title">ئونۆ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- پەڕەی ڕیزبەندی -->
+        <div id="leaderboardPage" style="display: none;">
+            <div class="leaderboard-empty">
+                لە ئێستادا هیچ تۆمارێک نیە
+            </div>
+        </div>
+
+        <!-- پەڕەی ڕێکخستنەکان -->
+        <div id="settingsPage" style="display: none;">
+            <div class="settings-grid">
+                <div class="settings-box" onclick="handleSetting('profile')">
+                    <div class="settings-icon">👤</div>
+                    <div class="settings-text">پرۆفایل</div>
+                </div>
+                <div class="settings-box" onclick="handleSetting('app_settings')">
+                    <div class="settings-icon">⚙️</div>
+                    <div class="settings-text">رێکخستنی بەرنامە</div>
+                </div>
+                <div class="settings-box" onclick="handleSetting('terms')">
+                    <div class="settings-icon">📜</div>
+                    <div class="settings-text">مەرجەکانی یاریکەر</div>
+                </div>
+                <div class="settings-box" onclick="handleSetting('feedback')">
+                    <div class="settings-icon">💬</div>
+                    <div class="settings-text">ڕاو بۆچوونەکان</div>
+                </div>
+                <div class="settings-box" onclick="handleSetting('languages')">
+                    <div class="settings-icon">🌐</div>
+                    <div class="settings-text">زمانەکان</div>
+                </div>
+                <div class="settings-box" onclick="handleSetting('exit')">
+                    <div class="settings-icon">🚪</div>
+                    <div class="settings-text">دەرچوون لە بەرنامە</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== پەڕەی کێ فێڵبازە؟ ===== -->
+        <div id="imposterPage" style="display: none; width: 100%; height: 100%;">
+            <div class="imposter-page">
+                <!-- بەشی ڤیدیۆ - YouTube Player -->
+                <div class="video-section" id="videoSection">
+                    <iframe class="youtube-player" 
+                        src="https://www.youtube.com/embed/0hkNWgQmSYI?autoplay=0&mute=0&controls=1&rel=0&modestbranding=1&playsinline=1"
+                        title="YouTube video player"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <!-- بەشی ڕێنمایی -->
+                <div class="instructions-section" id="instructionsSection">
+                    <div class="instructions-title">
+                        <span>🕵️</span> ڕێنماییەکانی "کێ فێڵبازە؟"
+                    </div>
+                    <ul class="instructions-list">
+                        <li><span class="bullet">١</span><span>یارییەکە پێکهاتووە لە ٤ بۆ ١٠ یاریکەر. یەکێک دەبێتە فێڵباز و ئەوانی تر دەبنە ڕاستگۆ.</span></li>
+                        <li><span class="bullet">٢</span><span>هەموو یاریکەران وەڵامی پرسیارێک دەدەن بەڵام فێڵباز نازانێت کە بابەت چییە و هەوڵدەدات خۆی لێبدات.</span></li>
+                        <li><span class="bullet">٣</span><span>لە کاتی وەڵامدانەوەدا، یاریکەرانی ڕاستگۆ دەبێت وەڵامی دروست بنووسن، فێڵباز دەبێت خەیاڵی خۆی بنووسێت.</span></li>
+                        <li><span class="bullet">٤</span><span>دوای خوێندنەوەی هەموو وەڵامەکان، دەنگدەکرێت بۆ دۆزینەوەی فێڵباز. ئەگەر دەنگی کەمتر لە نیوە وەرگرت، فێڵباز دەباتەوە.</span></li>
+                        <li><span class="bullet">٥</span><span>خاڵەکان: فێڵباز ئەگەر بدۆزرێتەوە خاڵ نابات، بەڵام ئەگەر نەدۆزرێتەوە ٣ خاڵ دەبات. ڕاستگۆکان بۆ هەر دەنگێکی ڕاست ١ خاڵ وەردەگرن.</span></li>
+                        <li><span class="bullet">٦</span><span>یارییەکە بۆ ٥ خول بەردەوام دەبێت. ئەو کەسەی زۆرترین خاڵی کۆکردبێتەوە دەبێتە براوەی کۆتایی.</span></li>
+                        <li><span class="bullet">٧</span><span>تۆ دەتوانیت بابەتی تایبەت زیاد بکەیت بۆ ئەوەی یارییەکە خوشتر بێت. خەیاڵی خۆت بکەرەوە!</span></li>
+                        <li><span class="bullet">٨</span><span>ئەگەر کەمتر لە ٤ یاریکەر بوون، یارییەکە دەستی پێ ناکات. پێویستە بەلایەنی کەمەوە ٤ کەس بن بۆ دەستپێکردن.</span></li>
+                        <li><span class="bullet">٩</span><span>ڕێگای خێرا: ئەگەر گەیشتن بە فێڵباز زۆر ئاسان بوو، ڕێگای قسەکردن لە نێوان یاریکەران سنووردار بکە.</span></li>
+                        <li><span class="bullet">١٠</span><span>یارییەکی کۆمەڵایەتی و پڕ بە خەندەیه، کەس خەفەت نابێت. بە ڕێزەوە یاری بکەن!</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== پەڕەی هەنگاوی دواتر ===== -->
+        <div id="nextStepPage" style="display: none; width: 100%; height: 100%;">
+            <div class="next-step-page">
+                <!-- کارتی زانیاری یاری -->
+                <div class="game-info-card">
+                    <div class="game-info-title">🎮 زانیاری یاری</div>
+                    <div class="game-info-item">
+                        <div class="game-info-icon">👥</div>
+                        <div class="game-info-text"><span>ژمارەی یاریکەران:</span> ٤ بۆ ١٠ کەس</div>
+                    </div>
+                    <div class="game-info-item">
+                        <div class="game-info-icon">⏱️</div>
+                        <div class="game-info-text"><span>ماوەی یاری:</span> ٢٠ خولەک</div>
+                    </div>
+                    <div class="game-info-item">
+                        <div class="game-info-icon">🎯</div>
+                        <div class="game-info-text"><span>ئامانج:</span> دۆزینەوەی فێڵباز یان شاردنەوەی ناسنامە</div>
+                    </div>
+                </div>
+
+                <!-- کارتی هۆشداری -->
+                <div class="warning-card">
+                    <div class="warning-title">
+                        <span>⚠️</span> خاڵە گرنگەکان
+                    </div>
+                    <ul class="warning-list">
+                        <li><span class="warning-bullet">!</span> پێویستە هەموو یاریکەران ئامادەبن بۆ دەستپێکردن</li>
+                        <li><span class="warning-bullet">!</span> فێڵباز نابێت ناسنامەی خۆی ئاشکرا بکات</li>
+                        <li><span class="warning-bullet">!</span> ڕاستگۆکان دەبێت بەڕاستی وەڵام بدەنەوە</li>
+                        <li><span class="warning-bullet">!</span> دەنگدان تەنها یەک جار بۆ هەر خولێک</li>
+                    </ul>
+                </div>
+
+                <!-- کارتی یاریزانەکان -->
+                <div class="players-card">
+                    <div class="players-title">
+                        <span>👥</span> یاریزانەکان
+                    </div>
+                    
+                    <!-- لیستی یاریزانەکان -->
+                    <div class="players-list" id="playersList"></div>
+
+                    <!-- دوگمەی زیادکردنی یاریزان -->
+                    <button class="add-player-btn" onclick="showAddPlayerDialog()">
+                        <span>➕</span> زیادکردنی یاریزان
+                    </button>
+                </div>
+
+                <!-- دوگمەی دەستپێکردن -->
+                <div class="action-buttons">
+                    <button class="primary-btn" id="startGameBtn" onclick="openGamePlayPage()">دەستپێکردن</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== پەڕەی یاری (کەتەگۆری و ڕێکخستن) ===== -->
+        <div id="gamePlayPage" style="display: none; width: 100%; height: 100%;">
+            <div class="game-play-page">
+                <!-- سەردێڕی کەتەگۆری -->
+                <div class="category-header">
+                    <span class="category-header-text">کەتەگۆری یاریەکە</span>
+                    <div class="category-select-all" onclick="toggleSelectAll()">
+                        <input type="checkbox" id="selectAllCheckbox" checked onchange="selectAllCategories()">
+                        <span>هەمووی</span>
+                    </div>
+                </div>
+
+                <!-- بۆکسە کەتەگۆریەکان (سکرۆڵی هۆریزۆنتاڵ) -->
+                <div class="horizontal-scroll">
+                    <div class="category-boxes" id="categoryBoxes">
+                        <!-- کەتەگۆریەکان لە JSـەوە دادەنرێن -->
+                    </div>
+                </div>
+
+                <!-- کارتی ڕێکخستنەکانی یاری -->
+                <div class="game-settings-card">
+                    <div class="settings-card-title">⚙️ گۆڕانکاری لەیاری</div>
+                    
+                    <!-- ئاشکراکردنی فێڵباز -->
+                    <div class="setting-item">
+                        <div class="setting-text">
+                            <strong>ئاشکرا کردنی فێڵباز:</strong><br>
+                            دوای ئەوە خول تەواو بوو فێڵبازەکەم بۆ ئاشکرا بکە
+                        </div>
+                        <div class="toggle-btn" id="revealToggle" onclick="toggleSetting('reveal')"></div>
+                    </div>
+
+                    <!-- وشەی جێگرەوە بۆ فێڵباز -->
+                    <div class="setting-item">
+                        <div class="setting-text">
+                            <strong>وشەی جێگرەوە بۆ فێڵبازەکە:</strong><br>
+                            کەس نازانێت ئایا فێڵبازە یان نا چونکە هەموو ڕاستگۆکان وشەیەکیان پێ دەدرێت وە فێڵباز وشەیەکی تری پێدەدرێت
+                        </div>
+                        <div class="toggle-btn off" id="wordToggle" onclick="toggleWordSetting()"></div>
+                    </div>
+
+                    <!-- ئاماژە -->
+                    <div class="setting-item">
+                        <div class="setting-text">
+                            <strong>ئاماژە:</strong><br>
+                            فێڵباز نازانێت وشە ڕاستەکە چیە بەڵام ئاماژەیەک وەردەگرێت بۆ تێگەیشتن و نزیک بوون لە ڕاستگۆکان
+                        </div>
+                        <div class="toggle-btn off" id="hintToggle" onclick="toggleHintSetting()"></div>
+                    </div>
+                </div>
+
+                <!-- دوگمەی دەستپێکردن -->
+                <button class="start-game-btn" onclick="openDictatorPage()">دەستپێکردن</button>
+            </div>
+        </div>
+
+        <!-- ===== پەڕەی دیکتەیتەر (پەڕەی نیشاندانی کارتەکان) ===== -->
+        <div id="dictatorPage" style="display: none; width: 100%; height: 100%;">
+            <div class="dictator-page">
+                <div class="game-title">کێ فێڵبازە؟</div>
+                
+                <!-- کۆنتەینەری هەردوو بۆکسەکە - لە هەمان شوێن -->
+                <div class="cards-container" id="cardsContainer">
+                    
+                    <!-- بۆکسی کارتەکان (لە ژێرەوە) - ڕەش و چوارچێوەی پرتەقاڵی -->
+                    <div class="card-display" id="cardDisplay">
+                        <div class="card-content">
+                            <div class="card-category" id="cardCategory">کەتەگۆری</div>
+                            <div class="card-value" id="cardValue"></div>
+                            <div class="spy-image-container" id="spyContainer" style="display: none;">
+                                <img src="https://i.ibb.co/Fbmy9N21/Screenshot-20260222-213229-Gallery.jpg" alt="فێڵباز" class="spy-image">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- بۆکسی ناوی یاریزانەکان (لە سەرەوە) - پاشبنەمای پرتەقاڵی -->
+                    <div class="player-card" id="playerCard">
+                        <div class="player-name" id="currentPlayerName"></div>
+                        <div class="player-action" id="currentPlayerAction"></div>
+                        <div class="swipe-indicator" id="swipeIndicator">
+                            <span class="arrow-up">⬆️</span>
+                            <span>بەرەو سەرەوە بخە بۆ بینینی کارتەکەت</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- بەشی خوارەوە - دوگمەی قفڵ و دوگمەی ناڤیگەیشن -->
+                <div class="bottom-section">
+                    <div class="lock-btn" id="lockBtn" onclick="showLockConfirm()">🔓</div>
+                    <button class="nav-button-card disabled" id="navButton" onclick="nextPlayer()"></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== پەڕەی دەستپێکردن ===== -->
+        <div id="startFinalPage" style="display: none; width: 100%; height: 100%;">
+            <div class="start-final-page">
+                <div class="start-final-content">
+                    <div class="start-final-title">کێ فێڵبازە؟</div>
+                    <div class="start-final-message">بەم زوانە چالاک دەبێت</div>
+                    <div class="loading-dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== پەڕەی چەرخ (Spin) ===== -->
+        <div id="spinPage" style="display: none; width: 100%; height: 100%;">
+            <div class="spin-page">
+                <div class="spin-container">
+                    <div class="spin-header">
+                        چەرخەکە بسوڕێنە:
+                    </div>
+                    <div class="spin-subheader">
+                        بۆ ئەوەی یاریزانێک هەڵبژێرێت تاوەکو دەست پێبکات
+                    </div>
+
+                    <div class="spin-wheel-wrapper">
+                        <div class="spin-wheel" id="spinWheel" ontouchstart="startSpin(event)" ontouchmove="spinWheel(event)" ontouchend="endSpin(event)" ontouchcancel="endSpin(event)">
+                            <div class="wheel-center" id="wheelCenter">🎯</div>
+                        </div>
+                        <div class="wheel-pointer"></div>
+                    </div>
+
+                    <div class="result-box" id="resultBox">
+                        <div class="result-label">ئەم یاریزانە دەست پێدەکات:</div>
+                        <div class="result-name" id="resultName">-</div>
+                    </div>
+
+                    <button class="spin-start-btn" id="startGameBtn" onclick="openGamePage()">یاریەکە دەستی پێکرد</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== پەڕەی یاری (Game Page) ===== -->
+        <div id="gamePage" style="display: none; width: 100%; height: 100%;">
+            <div class="game-page">
+                <div class="game-timer-section">
+                    <div class="timer-display" id="timerDisplay">05:00</div>
+                    <div class="timer-label">ماوەی خول</div>
+                </div>
+                <div class="game-controls-section">
+                    <div class="controls-grid">
+                        <div class="control-box" id="pauseControl" onclick="togglePause()">
+                            <div class="control-icon" id="pauseIcon">⏸️</div>
+                            <div class="control-text" id="pauseText">وەستاندنی کات</div>
+                        </div>
+                        <div class="control-box" onclick="showRevealDialog()">
+                            <div class="control-icon">🔍</div>
+                            <div class="control-text">کۆتایی ئەم خولە و ئاشکراکردن</div>
+                        </div>
+                        <div class="control-box" onclick="showResetConfirm()">
+                            <div class="control-icon">🔄</div>
+                            <div class="control-text">دەستپێکردن لە سەرەتاوە</div>
+                        </div>
+                        <div class="control-box" onclick="showPointsDialog()">
+                            <div class="control-icon">⭐</div>
+                            <div class="control-text">خاڵەکان</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== پەڕەی ئاشکراکردن (Reveal Page) ===== -->
+        <div id="revealPage" style="display: none; width: 100%; height: 100%;">
+            <div class="reveal-page">
+                <div class="reveal-message">فێڵبازەکە</div>
+                <div class="reveal-name" id="revealName">-</div>
+                <div class="reveal-message">بوو</div>
+                <button class="reveal-points-btn" onclick="openPointsDialog()">خاڵ دابنێ بۆ یاریزانان</button>
+            </div>
+        </div>
+
+        <!-- ===== دیالۆگی خاڵەکان (Points Dialog) ===== -->
+        <div id="pointsDialog" style="display: none;" class="points-dialog">
+            <div class="points-dialog-content">
+                <div class="points-dialog-title">خاڵەکانی یاریزانان</div>
+                <div class="points-dialog-list" id="pointsDialogList"></div>
+                <div class="points-dialog-footer">
+                    <button class="points-dialog-close" onclick="closePointsDialog()">داخستن</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== پەڕەی دەستی پێکردن (Game Started) ===== -->
+        <div id="gameStartedPage" style="display: none; width: 100%; height: 100%;">
+            <div class="game-started-page">
+                <div class="game-started-content">
+                    <div class="game-started-title">یاری فێڵباز دەستی پێکرد</div>
+                    <div class="game-started-winner" id="winnerName">-</div>
+                    <div class="game-started-message">بەم زووانە</div>
+                    <div class="loading-dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ========== تاسک باڕی خوارەوەی سەرەکی ========== -->
+    <footer class="taskbar-bottom" id="bottomNav">
+        <div class="nav-button active" onclick="navigateTo('games', this)">
+            <span class="nav-icon">🎮</span>
+        </div>
+        <div class="nav-button" onclick="navigateTo('leaderboard', this)">
+            <span class="nav-icon">🏆</span>
+        </div>
+        <div class="nav-button" onclick="navigateTo('settings', this)">
+            <span class="nav-icon">⚙️</span>
+        </div>
+    </footer>
+
+    <!-- ========== تاسک باڕی خوارەوەی تایبەت بە پەڕەکانی کێ فێڵبازە ========== -->
+    <div class="imposter-bottom-bar" id="imposterBottomBar" style="display: none;">
+        <div class="bottom-next-btn" onclick="openNextStepPage()">هەنگاوی دواتر</div>
+    </div>
+
+    <!-- ===== دیالۆگی زیادکردن/دەستکاری یاریزان ===== -->
+    <div id="playerDialog" style="display: none;" class="player-dialog">
+        <div class="dialog-content">
+            <div class="dialog-title" id="dialogTitle">زیادکردنی یاریزان</div>
+            <input type="text" id="playerNameInput" class="dialog-input" placeholder="ناوی یاریزان بنووسە..." maxlength="20">
+            <div class="dialog-buttons" id="dialogButtons">
+                <button class="dialog-btn confirm" id="dialogConfirmBtn" onclick="confirmAddPlayer()">زیادبکە</button>
+                <button class="dialog-btn cancel" onclick="hidePlayerDialog()">ڕەتکردنەوە</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== دیالۆگی دڵنیابوون ===== -->
+    <div id="confirmDialog" style="display: none;" class="confirm-dialog">
+        <div class="confirm-content">
+            <div class="confirm-title" id="confirmTitle">🔒 دڵنیابوون</div>
+            <div class="confirm-message" id="confirmMessage">دڵنیای دەتەوێت کارتەکەت دابخەی؟</div>
+            <div class="confirm-buttons" id="confirmButtons">
+                <button class="confirm-btn yes" id="confirmYesBtn" onclick="confirmAction(true)">بەڵێ</button>
+                <button class="confirm-btn no" onclick="hideConfirmDialog()">نەخێر</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== دیالۆگی هەڵە ===== -->
+    <div id="errorDialog" style="display: none;" class="error-dialog">
+        <div class="error-content">
+            <div class="error-icon">⚠️</div>
+            <div class="error-message" id="errorMessage"></div>
+            <button class="error-btn" onclick="hideErrorDialog()">باشە</button>
+        </div>
+    </div>
+
+    <script>
+        // ========== کۆدی سەرەکی ==========
+        let currentPage = 'games';
+        let isImposterPageActive = false;
+        let isNextStepPageActive = false;
+        let isGamePlayPageActive = false;
+        let isDictatorPageActive = false;
+        let isStartFinalPageActive = false;
+        let isSpinPageActive = false;
+        let isGamePageActive = false;
+        let isRevealPageActive = false;
+        let isPointsDialogActive = false;
+        let isGameStartedPageActive = false;
+        let startY = 0;
+        let currentHeight = 50;
+        const maxHeight = 90;
+        const minHeight = 50;
+
+        // لیستی یاریزانەکان
+        let players = [];
+        let playerPoints = {};
+        let currentEditIndex = -1;
+        let spyPlayerIndex = 1; // بۆ نموونە یاریزانی دووەم فێڵبازە
+        
+        // کەتەگۆریەکان
+        const categories = [
+            { name: 'وڵاتان', icon: '🌍', selected: true },
+            { name: 'شوێنەکان', icon: '📍', selected: true },
+            { name: 'کەل و پەل', icon: '📦', selected: true },
+            { name: 'خەڵک', icon: '👥', selected: true },
+            { name: 'یاریزانی تۆپی پێ', icon: '⚽', selected: true },
+            { name: 'ئاژەڵ و باڵندە', icon: '🐕', selected: true },
+            { name: 'فیلم و دراما', icon: '🎬', selected: true },
+            { name: 'خواردن', icon: '🍕', selected: true }
+        ];
+        
+        // بۆ پەڕەی دیکتەیتەر
+        let currentPlayerIndex = 0;
+        let hasSeenCard = false;
+        let touchStartY = 0;
+        let isDragging = false;
+        let currentTranslateY = 0;
+        let isLocked = false;
+        let pendingLock = false;
+
+        // بۆ پەڕەی Spin
+        let spinVelocity = 0;
+        let spinAngle = 0;
+        let spinAnimation = null;
+        let lastSpinTime = 0;
+        let lastSpinPosition = 0;
+        let isSpinning = false;
+        let spinSegments = [];
+        let spinResult = '';
+
+        // بۆ کاتژمێر
+        let timerInterval = null;
+        let timerSeconds = 300; // 5 خولەک = 300 چرکە
+        let isTimerPaused = false;
+
+        // بۆ دیالۆگی دڵنیابوون
+        let confirmCallback = null;
+
+        // نوێکردنەوەی تاسک باڕی سەرەوە بەپێی پەڕە
+        function updateTaskbar() {
+            const taskbar = document.getElementById('taskbarContent');
+            const header = document.querySelector('.taskbar-top');
+            
+            // ئەو پەڕانەی کە تاسک باڕیان نییە
+            if (isGamePageActive || isSpinPageActive || isPointsDialogActive || isRevealPageActive) {
+                header.classList.add('hidden');
+            } else {
+                header.classList.remove('hidden');
+            }
+            
+            if (isGameStartedPageActive) {
+                header.classList.add('black');
+                header.style.backgroundColor = '#000000';
+                taskbar.innerHTML = `
+                    <div class="back-btn" onclick="closeGameStartedPage()">←</div>
+                    <div></div>
+                `;
+            }
+            else if (isStartFinalPageActive) {
+                header.classList.add('black');
+                header.style.backgroundColor = '#000000';
+                taskbar.innerHTML = `
+                    <div class="back-btn" onclick="closeStartFinalPage()">←</div>
+                    <div></div>
+                `;
+            }
+            else if (isDictatorPageActive) {
+                header.classList.add('black');
+                header.style.backgroundColor = '#000000';
+                taskbar.innerHTML = `
+                    <div class="back-btn" onclick="closeDictatorPage()">←</div>
+                    <div></div>
+                `;
+            }
+            else if (isGamePlayPageActive) {
+                header.classList.add('black');
+                header.style.backgroundColor = '#000000';
+                taskbar.innerHTML = `
+                    <div class="back-btn" onclick="closeGamePlayPage()">←</div>
+                    <div></div>
+                `;
+            }
+            else if (isNextStepPageActive) {
+                header.classList.add('black');
+                header.style.backgroundColor = '#000000';
+                taskbar.innerHTML = `
+                    <div class="back-btn" onclick="closeNextStepPage()">←</div>
+                    <div></div>
+                `;
+            }
+            else if (isImposterPageActive) {
+                header.classList.add('black');
+                header.style.backgroundColor = '#000000';
+                taskbar.innerHTML = `
+                    <div class="back-btn" onclick="closeImposterPage()">←</div>
+                    <div></div>
+                `;
+            } else {
+                header.classList.remove('black');
+                header.style.backgroundColor = '#F87158';
+                taskbar.innerHTML = `
+                    <div class="profile-area">
+                        <div class="avatar">K</div>
+                        <span class="username">KWB Gamers</span>
+                    </div>
+                    <div></div>
+                `;
+            }
+        }
+
+        // کردنەوەی پەڕەی کێ فێڵبازە؟
+        function openImposterPage() {
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'block';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.getElementById('imposterBottomBar').style.display = 'flex';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.add('with-bottom-bar');
+            container.classList.remove('fullscreen');
+            container.style.padding = '0';
+            
+            const videoSection = document.getElementById('videoSection');
+            const instructionsSection = document.getElementById('instructionsSection');
+            
+            if (videoSection && instructionsSection) {
+                videoSection.style.height = '50%';
+                instructionsSection.style.height = '50%';
+                currentHeight = 50;
+            }
+            
+            isImposterPageActive = true;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'imposter';
+            updateTaskbar();
+        }
+
+        // داخستنی پەڕەی کێ فێڵبازە؟
+        function closeImposterPage() {
+            document.getElementById('gamesPage').style.display = 'block';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'none';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.getElementById('imposterBottomBar').style.display = 'none';
+            document.getElementById('bottomNav').style.display = 'flex';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.remove('no-bottom-bar');
+            container.classList.remove('with-bottom-bar');
+            container.classList.remove('fullscreen');
+            container.style.padding = '2% 16px 2% 16px';
+            
+            document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.nav-button')[0].classList.add('active');
+            
+            isImposterPageActive = false;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'games';
+            updateTaskbar();
+        }
+
+        // کردنەوەی پەڕەی هەنگاوی دواتر
+        function openNextStepPage() {
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'none';
+            document.getElementById('nextStepPage').style.display = 'block';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.getElementById('imposterBottomBar').style.display = 'none';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.remove('with-bottom-bar');
+            container.classList.remove('fullscreen');
+            container.style.padding = '0';
+            
+            // ڕێکخستنەوەی لیستی یاریزانەکان
+            updatePlayersList();
+            
+            isImposterPageActive = false;
+            isNextStepPageActive = true;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'nextstep';
+            updateTaskbar();
+        }
+
+        // داخستنی پەڕەی هەنگاوی دواتر
+        function closeNextStepPage() {
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'block';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.getElementById('imposterBottomBar').style.display = 'flex';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.add('with-bottom-bar');
+            container.classList.remove('fullscreen');
+            container.style.padding = '0';
+            
+            const videoSection = document.getElementById('videoSection');
+            const instructionsSection = document.getElementById('instructionsSection');
+            
+            if (videoSection && instructionsSection) {
+                videoSection.style.height = '50%';
+                instructionsSection.style.height = '50%';
+                currentHeight = 50;
+            }
+            
+            isImposterPageActive = true;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'imposter';
+            updateTaskbar();
+        }
+
+        // کردنەوەی پەڕەی یاری (کەتەگۆری و ڕێکخستن)
+        function openGamePlayPage() {
+            if (players.length < 4) {
+                showError(`نابێت لە ٤ یاریزان کەمتر بێت (ئێستا ${players.length} یاریزانە)`);
+                return;
+            }
+            
+            if (players.length > 10) {
+                showError(`نابێت لە ١٠ یاریزان زیاتر بێت (ئێستا ${players.length} یاریزانە)`);
+                return;
+            }
+            
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'none';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'block';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.getElementById('imposterBottomBar').style.display = 'none';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.remove('with-bottom-bar');
+            container.classList.remove('fullscreen');
+            container.style.padding = '0';
+            
+            // پڕکردنەوەی کەتەگۆریەکان
+            renderCategories();
+            
+            isImposterPageActive = false;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = true;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'gameplay';
+            updateTaskbar();
+        }
+
+        // داخستنی پەڕەی یاری
+        function closeGamePlayPage() {
+            // دەگەڕێتەوە پەڕەی زانیاری یاری (nextStepPage)
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'none';
+            document.getElementById('nextStepPage').style.display = 'block';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.getElementById('imposterBottomBar').style.display = 'none';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.remove('with-bottom-bar');
+            container.classList.remove('fullscreen');
+            container.style.padding = '0';
+            
+            // نوێکردنەوەی لیستی یاریزانەکان
+            updatePlayersList();
+            
+            isImposterPageActive = false;
+            isNextStepPageActive = true;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'nextstep';
+            updateTaskbar();
+        }
+
+        // کردنەوەی پەڕەی دیکتەیتەر (پەڕەی نیشاندانی کارتەکان)
+        function openDictatorPage() {
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'none';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'block';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.getElementById('imposterBottomBar').style.display = 'none';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.remove('with-bottom-bar');
+            container.classList.remove('fullscreen');
+            container.style.padding = '0';
+            
+            // ڕێکخستنەوەی پەڕەی دیکتەیتەر
+            currentPlayerIndex = 0;
+            hasSeenCard = false;
+            isLocked = false;
+            pendingLock = false;
+            document.getElementById('lockBtn').innerHTML = '🔓';
+            document.getElementById('lockBtn').classList.remove('locked');
+            updateDictatorPage();
+            
+            isImposterPageActive = false;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = true;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'dictator';
+            updateTaskbar();
+        }
+
+        // داخستنی پەڕەی دیکتەیتەر
+        function closeDictatorPage() {
+            // دەگەڕێتەوە پەڕەی کەتەگۆری (gamePlayPage)
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'none';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'block';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.getElementById('imposterBottomBar').style.display = 'none';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.remove('with-bottom-bar');
+            container.classList.remove('fullscreen');
+            container.style.padding = '0';
+            
+            // پڕکردنەوەی کەتەگۆریەکان
+            renderCategories();
+            
+            isImposterPageActive = false;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = true;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'gameplay';
+            updateTaskbar();
+        }
+
+        // کردنەوەی پەڕەی دەستپێکردن
+        function openStartFinalPage() {
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'none';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'block';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.getElementById('imposterBottomBar').style.display = 'none';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.remove('with-bottom-bar');
+            container.classList.remove('fullscreen');
+            container.style.padding = '0';
+            
+            isImposterPageActive = false;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = true;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'startfinal';
+            updateTaskbar();
+        }
+
+        // داخستنی پەڕەی دەستپێکردن
+        function closeStartFinalPage() {
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'block';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.getElementById('imposterBottomBar').style.display = 'flex';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.add('with-bottom-bar');
+            container.classList.remove('fullscreen');
+            container.style.padding = '0';
+            
+            const videoSection = document.getElementById('videoSection');
+            const instructionsSection = document.getElementById('instructionsSection');
+            
+            if (videoSection && instructionsSection) {
+                videoSection.style.height = '50%';
+                instructionsSection.style.height = '50%';
+                currentHeight = 50;
+            }
+            
+            isImposterPageActive = true;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'imposter';
+            updateTaskbar();
+        }
+
+        // کردنەوەی پەڕەی Spin
+        function openSpinPage() {
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'none';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'block';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.getElementById('imposterBottomBar').style.display = 'none';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.remove('with-bottom-bar');
+            container.classList.add('fullscreen');
+            container.style.padding = '0';
+            
+            // دروستکردنی بەشەکانی چەرخ
+            createSpinSegments();
+            
+            isImposterPageActive = false;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = true;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'spin';
+            updateTaskbar();
+        }
+
+        // داخستنی پەڕەی Spin
+        function closeSpinPage() {
+            // ڕاگرتنی جوڵەی چەرخ
+            if (spinAnimation) {
+                cancelAnimationFrame(spinAnimation);
+                spinAnimation = null;
+            }
+            
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'block';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.getElementById('imposterBottomBar').style.display = 'flex';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.add('with-bottom-bar');
+            container.classList.remove('fullscreen');
+            container.style.padding = '0';
+            
+            const videoSection = document.getElementById('videoSection');
+            const instructionsSection = document.getElementById('instructionsSection');
+            
+            if (videoSection && instructionsSection) {
+                videoSection.style.height = '50%';
+                instructionsSection.style.height = '50%';
+                currentHeight = 50;
+            }
+            
+            isImposterPageActive = true;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'imposter';
+            updateTaskbar();
+        }
+
+        // کردنەوەی پەڕەی یاری
+        function openGamePage() {
+            const resultName = document.getElementById('resultName').textContent;
+            if (resultName === '-') {
+                showError('تکایە یەکەم جار چەرخەکە بخولێنەوە');
+                return;
+            }
+            
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'none';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'block';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.getElementById('imposterBottomBar').style.display = 'none';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.remove('with-bottom-bar');
+            container.classList.add('fullscreen');
+            container.style.padding = '0';
+            
+            // دەستپێکردنی کاتژمێر
+            startTimer();
+            
+            isImposterPageActive = false;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = true;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'game';
+            updateTaskbar();
+        }
+
+        // داخستنی پەڕەی یاری
+        function closeGamePage() {
+            stopTimer();
+            
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'block';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.getElementById('imposterBottomBar').style.display = 'flex';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.add('with-bottom-bar');
+            container.classList.remove('fullscreen');
+            container.style.padding = '0';
+            
+            const videoSection = document.getElementById('videoSection');
+            const instructionsSection = document.getElementById('instructionsSection');
+            
+            if (videoSection && instructionsSection) {
+                videoSection.style.height = '50%';
+                instructionsSection.style.height = '50%';
+                currentHeight = 50;
+            }
+            
+            isImposterPageActive = true;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'imposter';
+            updateTaskbar();
+        }
+
+        // پیشاندانی دیالۆگی خاڵەکان
+        function showPointsDialog() {
+            updatePointsDialogList();
+            document.getElementById('pointsDialog').style.display = 'flex';
+            isPointsDialogActive = true;
+            updateTaskbar();
+        }
+
+        // داخستنی دیالۆگی خاڵەکان
+        function closePointsDialog() {
+            document.getElementById('pointsDialog').style.display = 'none';
+            isPointsDialogActive = false;
+            updateTaskbar();
+        }
+
+        // نوێکردنەوەی لیستی دیالۆگی خاڵەکان
+        function updatePointsDialogList() {
+            const list = document.getElementById('pointsDialogList');
+            if (!list) return;
+            
+            list.innerHTML = '';
+            
+            players.forEach(player => {
+                const points = playerPoints[player] || 0;
+                const firstLetter = player.charAt(0).toUpperCase();
+                
+                const item = document.createElement('div');
+                item.className = 'points-dialog-item';
+                
+                item.innerHTML = `
+                    <div class="points-dialog-avatar">${firstLetter}</div>
+                    <div class="points-dialog-name">${player}</div>
+                    <div class="points-dialog-value">${points}</div>
+                `;
+                
+                list.appendChild(item);
+            });
+        }
+
+        // کردنەوەی پەڕەی ئاشکراکردن
+        function openRevealPage() {
+            const spyName = players[spyPlayerIndex] || 'نادیار';
+            document.getElementById('revealName').textContent = spyName;
+            
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'none';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'block';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.getElementById('imposterBottomBar').style.display = 'none';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.remove('with-bottom-bar');
+            container.classList.add('fullscreen');
+            container.style.padding = '0';
+            
+            isImposterPageActive = false;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = true;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'reveal';
+            updateTaskbar();
+        }
+
+        // داخستنی پەڕەی ئاشکراکردن
+        function closeRevealPage() {
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'block';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.getElementById('imposterBottomBar').style.display = 'flex';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.add('with-bottom-bar');
+            container.classList.remove('fullscreen');
+            container.style.padding = '0';
+            
+            const videoSection = document.getElementById('videoSection');
+            const instructionsSection = document.getElementById('instructionsSection');
+            
+            if (videoSection && instructionsSection) {
+                videoSection.style.height = '50%';
+                instructionsSection.style.height = '50%';
+                currentHeight = 50;
+            }
+            
+            isImposterPageActive = true;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'imposter';
+            updateTaskbar();
+        }
+
+        // کردنەوەی پەڕەی دەستی پێکردن
+        function openGameStartedPage() {
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'none';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'block';
+            
+            document.getElementById('imposterBottomBar').style.display = 'none';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.remove('with-bottom-bar');
+            container.classList.remove('fullscreen');
+            container.style.padding = '0';
+            
+            isImposterPageActive = false;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = true;
+            currentPage = 'gamestarted';
+            updateTaskbar();
+        }
+
+        // داخستنی پەڕەی دەستی پێکردن
+        function closeGameStartedPage() {
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'block';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.getElementById('imposterBottomBar').style.display = 'flex';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.add('with-bottom-bar');
+            container.classList.remove('fullscreen');
+            container.style.padding = '0';
+            
+            const videoSection = document.getElementById('videoSection');
+            const instructionsSection = document.getElementById('instructionsSection');
+            
+            if (videoSection && instructionsSection) {
+                videoSection.style.height = '50%';
+                instructionsSection.style.height = '50%';
+                currentHeight = 50;
+            }
+            
+            isImposterPageActive = true;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'imposter';
+            updateTaskbar();
+        }
+
+        // ===== فانکشنەکانی کەتەگۆری =====
+        function renderCategories() {
+            const container = document.getElementById('categoryBoxes');
+            container.innerHTML = '';
+            
+            categories.forEach((cat, index) => {
+                const box = document.createElement('div');
+                box.className = `category-box ${cat.selected ? 'selected' : ''}`;
+                box.onclick = () => toggleCategory(index);
+                box.innerHTML = `
+                    <div class="category-icon">${cat.icon}</div>
+                    <div class="category-name">${cat.name}</div>
+                `;
+                container.appendChild(box);
+            });
+        }
+        
+        function toggleCategory(index) {
+            categories[index].selected = !categories[index].selected;
+            renderCategories();
+            
+            const selectAll = document.getElementById('selectAllCheckbox');
+            const allSelected = categories.every(cat => cat.selected);
+            selectAll.checked = allSelected;
+        }
+        
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAllCheckbox');
+            const newState = !selectAll.checked;
+            selectAll.checked = newState;
+            selectAllCategories();
+        }
+        
+        function selectAllCategories() {
+            const selectAll = document.getElementById('selectAllCheckbox');
+            categories.forEach(cat => cat.selected = selectAll.checked);
+            renderCategories();
+        }
+
+        // ===== فانکشنەکانی یاریزانەکان =====
+        function showAddPlayerDialog() {
+            currentEditIndex = -1;
+            document.getElementById('dialogTitle').textContent = 'زیادکردنی یاریزان';
+            document.getElementById('dialogConfirmBtn').textContent = 'زیادبکە';
+            document.getElementById('playerNameInput').value = '';
+            document.getElementById('playerDialog').style.display = 'flex';
+            document.getElementById('playerNameInput').focus();
+            
+            const deleteBtn = document.getElementById('deleteBtn');
+            if (deleteBtn) deleteBtn.style.display = 'none';
+        }
+
+        function showEditPlayerDialog(index) {
+            currentEditIndex = index;
+            document.getElementById('dialogTitle').textContent = 'دەستکاری یاریزان';
+            document.getElementById('dialogConfirmBtn').textContent = 'نوێکردنەوە';
+            document.getElementById('playerNameInput').value = players[index];
+            
+            const dialogButtons = document.getElementById('dialogButtons');
+            if (!document.getElementById('deleteBtn')) {
+                const deleteBtn = document.createElement('button');
+                deleteBtn.id = 'deleteBtn';
+                deleteBtn.className = 'dialog-btn delete';
+                deleteBtn.textContent = 'سڕینەوە';
+                deleteBtn.onclick = function() { deletePlayer(currentEditIndex); };
+                dialogButtons.appendChild(deleteBtn);
+            } else {
+                document.getElementById('deleteBtn').style.display = 'block';
+            }
+            
+            document.getElementById('playerDialog').style.display = 'flex';
+            document.getElementById('playerNameInput').focus();
+        }
+
+        function hidePlayerDialog() {
+            document.getElementById('playerDialog').style.display = 'none';
+            const deleteBtn = document.getElementById('deleteBtn');
+            if (deleteBtn) {
+                deleteBtn.style.display = 'none';
+            }
+        }
+
+        function isValidPlayerName(name) {
+            // دەبێت بەلایەنی کەمەوە 3 پیت هەبێت
+            if (name.length < 3) {
+                return false;
+            }
+            return true;
+        }
+
+        function isPlayerNameDuplicate(name, excludeIndex = -1) {
+            for (let i = 0; i < players.length; i++) {
+                if (i !== excludeIndex && players[i].toLowerCase() === name.toLowerCase()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function confirmAddPlayer() {
+            const playerName = document.getElementById('playerNameInput').value.trim();
+            
+            if (playerName === '') {
+                showError('تکایە ناوی یاریزان بنووسە');
+                return;
+            }
+            
+            if (!isValidPlayerName(playerName)) {
+                showError('پێویستە ناوی یاریزان بەلایەنی کەمەوە لە ٣ پیت پێکهاتبێت');
+                return;
+            }
+            
+            if (isPlayerNameDuplicate(playerName, currentEditIndex)) {
+                showError('ئەم ناوە پێشتر تۆمار کراوە');
+                return;
+            }
+            
+            if (currentEditIndex === -1) {
+                if (players.length >= 10) {
+                    showError('زۆرترین ژمارەی یاریکەران ١٠ کەسە');
+                    hidePlayerDialog();
+                    return;
+                }
+                players.push(playerName);
+                // دەستپێکردنی خاڵەکان بۆ یاریزانە نوێیەکە
+                playerPoints[playerName] = 0;
+            } else {
+                // سڕینەوەی ناوی کۆن لە خاڵەکان
+                delete playerPoints[players[currentEditIndex]];
+                players[currentEditIndex] = playerName;
+                playerPoints[playerName] = 0;
+            }
+            
+            updatePlayersList();
+            hidePlayerDialog();
+        }
+
+        function deletePlayer(index) {
+            // سڕینەوەی خاڵەکانی یاریزان
+            delete playerPoints[players[index]];
+            players.splice(index, 1);
+            updatePlayersList();
+            hidePlayerDialog();
+        }
+
+        function updatePlayersList() {
+            const playersList = document.getElementById('playersList');
+            if (!playersList) return;
+            
+            playersList.innerHTML = '';
+            
+            players.forEach((player, index) => {
+                const firstLetter = player.charAt(0).toUpperCase();
+                const playerElement = document.createElement('div');
+                playerElement.className = 'player-item';
+                playerElement.onclick = function(e) {
+                    if (!e.target.closest('.player-action-btn')) {
+                        showEditPlayerDialog(index);
+                    }
+                };
+                
+                playerElement.innerHTML = `
+                    <div class="player-avatar-small">${firstLetter}</div>
+                    <div class="player-name-text">${player}</div>
+                    <div class="player-actions">
+                        <button class="player-action-btn edit" onclick="event.stopPropagation(); showEditPlayerDialog(${index})">✏️</button>
+                        <button class="player-action-btn delete" onclick="event.stopPropagation(); deletePlayer(${index})">🗑️</button>
+                    </div>
+                `;
+                playersList.appendChild(playerElement);
+            });
+        }
+
+        // ===== فانکشنەکانی تۆگڵ =====
+        function toggleSetting(type) {
+            const element = document.getElementById(type + 'Toggle');
+            element.classList.toggle('off');
+            
+            // دیالۆگ نیشان مەدە - هیچ شتێک ناکرێت
+            // تەنها دۆخی دوگمەکە دەگۆڕێت
+        }
+
+        function toggleWordSetting() {
+            const wordToggle = document.getElementById('wordToggle');
+            const hintToggle = document.getElementById('hintToggle');
+            
+            // ئەگەر وشەی جێگرەوە چالاک بوو و ئاماژە چالاکە، ئاماژە ناچالاک بکە
+            if (!wordToggle.classList.contains('off') && !hintToggle.classList.contains('off')) {
+                hintToggle.classList.add('off');
+            }
+            
+            // گۆڕینی دۆخی وشەی جێگرەوە
+            wordToggle.classList.toggle('off');
+        }
+
+        function toggleHintSetting() {
+            const wordToggle = document.getElementById('wordToggle');
+            const hintToggle = document.getElementById('hintToggle');
+            
+            // ئەگەر ئاماژە چالاک بوو و وشەی جێگرەوە چالاکە، وشەی جێگرەوە ناچالاک بکە
+            if (!hintToggle.classList.contains('off') && !wordToggle.classList.contains('off')) {
+                wordToggle.classList.add('off');
+            }
+            
+            // گۆڕینی دۆخی ئاماژە
+            hintToggle.classList.toggle('off');
+        }
+
+        // ===== فانکشنەکانی پەڕەی دیکتەیتەر =====
+        function updateDictatorPage() {
+            if (currentPlayerIndex >= players.length) {
+                // گەیشتینە کۆتایی یاریزانەکان - دەچین بۆ پەڕەی Spin
+                openSpinPage();
+                return;
+            }
+            
+            // پیشاندانی یاریزانی ئێستا
+            document.getElementById('currentPlayerName').textContent = players[currentPlayerIndex];
+            document.getElementById('currentPlayerAction').textContent = 'پێویستە کارتەکەت ببینیت';
+            document.getElementById('swipeIndicator').style.display = 'flex';
+            
+            hasSeenCard = false;
+            
+            // دیاریکردنی ناوی کارت
+            let cardValue = 'کوردستان';
+            let cardCategory = 'شوێن';
+            let showSpy = false;
+            
+            if (currentPlayerIndex === spyPlayerIndex) {
+                cardValue = 'تۆ فێڵبازی';
+                cardCategory = 'ئاگاداری';
+                showSpy = true;
+            } else {
+                cardValue = 'کوردستان';
+                cardCategory = 'شوێن';
+                showSpy = false;
+            }
+            
+            document.getElementById('cardValue').textContent = cardValue;
+            document.getElementById('cardCategory').textContent = cardCategory;
+            
+            // پیشاندانی وێنەی فێڵباز ئەگەر پێویست بوو
+            const spyContainer = document.getElementById('spyContainer');
+            if (showSpy) {
+                spyContainer.style.display = 'block';
+            } else {
+                spyContainer.style.display = 'none';
+            }
+            
+            // نوێکردنەوەی دوگمەکە
+            updateNavButton();
+            
+            // ڕێکخستنەوەی بۆکسەکە بۆ شوێنی خۆی
+            const playerCard = document.getElementById('playerCard');
+            playerCard.style.transform = 'translateY(0)';
+            currentTranslateY = 0;
+        }
+        
+        function updateNavButton() {
+            const navButton = document.getElementById('navButton');
+            
+            if (currentPlayerIndex >= players.length) return;
+            
+            if (!hasSeenCard) {
+                navButton.textContent = 'سەرەتا کارتەکەت ببینە';
+                navButton.classList.add('disabled');
+            } else {
+                if (currentPlayerIndex === players.length - 1) {
+                    navButton.textContent = 'دەستپێبکە';
+                } else {
+                    const nextPlayerName = players[currentPlayerIndex + 1];
+                    navButton.textContent = `بیدە بە ${nextPlayerName}`;
+                }
+                navButton.classList.remove('disabled');
+            }
+        }
+        
+        // کۆنترۆڵکردنی جوڵەی پەنجە بۆ سکرۆلی بۆکسەکە (بە ڕێژەی 100%)
+        document.addEventListener('touchstart', function(e) {
+            if (!isDictatorPageActive || isLocked) return;
+            
+            if (e.target.closest('.player-card')) {
+                touchStartY = e.touches[0].clientY;
+                isDragging = true;
+            }
+        });
+        
+        document.addEventListener('touchmove', function(e) {
+            if (!isDictatorPageActive || !isDragging || isLocked) return;
+            
+            e.preventDefault();
+            
+            const touchEndY = e.touches[0].clientY;
+            const diffY = touchEndY - touchStartY;
+            
+            if (diffY < 0) {
+                // بەرزکردنەوەی بۆکسەکە بە تەواوی (تا کۆتایی)
+                const containerHeight = document.getElementById('cardsContainer').offsetHeight;
+                const moveAmount = Math.min(Math.abs(diffY), containerHeight); // دەتوانێت تا تەواوی بەرزایی بچێت
+                const playerCard = document.getElementById('playerCard');
+                playerCard.style.transform = `translateY(-${moveAmount}px)`;
+                currentTranslateY = moveAmount;
+            }
+        });
+        
+        document.addEventListener('touchend', function(e) {
+            if (!isDictatorPageActive || !isDragging || isLocked) return;
+            
+            const playerCard = document.getElementById('playerCard');
+            
+            // هەر کات پەنجە لادەدەیت، بۆکسەکە دەگەڕێتەوە شوێنی خۆی
+            playerCard.style.transform = 'translateY(0)';
+            
+            // تەنها ئەگەر بە تەواوی بەرز کرابێتەوە، hasSeenCard دەبێتە true
+            if (currentTranslateY > 100 && !hasSeenCard) {
+                hasSeenCard = true;
+                document.getElementById('swipeIndicator').style.display = 'none';
+                document.getElementById('currentPlayerAction').textContent = 'کارتەکەت بینی';
+                updateNavButton();
+            }
+            
+            isDragging = false;
+            touchStartY = 0;
+            currentTranslateY = 0;
+        });
+        
+        function showLockConfirm() {
+            if (!hasSeenCard) {
+                showError('سەرەتا کارتەکەت ببینە');
+                return;
+            }
+            
+            // پیشاندانی دیالۆگی دڵنیابوون
+            document.getElementById('confirmTitle').textContent = '🔒 دڵنیابوون';
+            document.getElementById('confirmMessage').textContent = 'دڵنیای دەتەوێت کارتەکەت دابخەی؟';
+            confirmCallback = function(confirmed) {
+                if (confirmed) {
+                    isLocked = true;
+                    const lockBtn = document.getElementById('lockBtn');
+                    lockBtn.innerHTML = '🔒';
+                    lockBtn.classList.add('locked');
+                }
+                hideConfirmDialog();
+            };
+            document.getElementById('confirmDialog').style.display = 'flex';
+        }
+        
+        function nextPlayer() {
+            if (!hasSeenCard && currentPlayerIndex < players.length) return;
+            
+            if (currentPlayerIndex < players.length - 1) {
+                currentPlayerIndex++;
+                hasSeenCard = false;
+                isLocked = false;
+                document.getElementById('lockBtn').innerHTML = '🔓';
+                document.getElementById('lockBtn').classList.remove('locked');
+                document.getElementById('swipeIndicator').style.display = 'flex';
+                document.getElementById('currentPlayerAction').textContent = 'پێویستە کارتەکەت ببینیت';
+                updateDictatorPage();
+            } else if (currentPlayerIndex === players.length - 1) {
+                // کۆتا یاریزان - دەچین بۆ پەڕەی Spin
+                openSpinPage();
+            }
+        }
+
+        // ===== فانکشنەکانی پەڕەی Spin =====
+        function createSpinSegments() {
+            if (players.length === 0) return;
+            
+            // دروستکردنی بەشەکان (هەر یاریزانێک 3 جار بە ڕێک)
+            spinSegments = [];
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < players.length; j++) {
+                    spinSegments.push(players[j]);
+                }
+            }
+            
+            // دروستکردنی دیزاینی چەرخ
+            const wheel = document.getElementById('spinWheel');
+            const segmentCount = spinSegments.length;
+            const anglePerSegment = 360 / segmentCount;
+            
+            // پاککردنەوەی دیزاینی پێشوو
+            const existingSegments = wheel.querySelectorAll('.segment-text');
+            existingSegments.forEach(seg => seg.remove());
+            
+            // زیادکردنی ناوەکان بۆ هەر بەشێک
+            for (let i = 0; i < segmentCount; i++) {
+                const segment = document.createElement('div');
+                segment.className = 'segment-text';
+                
+                // دیاریکردنی شوێن (polar to cartesian)
+                const angle = (i * anglePerSegment + anglePerSegment/2) * Math.PI / 180;
+                const radius = 110;
+                const x = 50 + radius * Math.sin(angle);
+                const y = 50 - radius * Math.cos(angle);
+                
+                segment.style.left = x + '%';
+                segment.style.top = y + '%';
+                segment.style.transform = `translate(-50%, -50%) rotate(${i * anglePerSegment + anglePerSegment/2}deg)`;
+                
+                // کورتکردنەوەی ناو ئەگەر زۆر درێژ بوو
+                let displayName = spinSegments[i];
+                if (displayName.length > 8) {
+                    displayName = displayName.substring(0, 6) + '...';
+                }
+                segment.textContent = displayName;
+                
+                wheel.appendChild(segment);
+            }
+            
+            // دیاریکردنی ڕەنگی بەشەکان
+            const colors = ['#F87158', '#4CAF50', '#3498db', '#FFC107', '#9C27B0', '#FF5722', '#00BCD4', '#E91E63'];
+            let gradientColors = [];
+            for (let i = 0; i < segmentCount; i++) {
+                const colorIndex = i % colors.length;
+                gradientColors.push(`${colors[colorIndex]} ${i * anglePerSegment}deg ${(i + 1) * anglePerSegment}deg`);
+            }
+            
+            wheel.style.background = `conic-gradient(from 0deg, ${gradientColors.join(', ')})`;
+        }
+
+        function startSpin(e) {
+            if (!isSpinPageActive) return;
+            
+            e.preventDefault();
+            
+            // ڕاگرتنی جوڵەی پێشوو
+            if (spinAnimation) {
+                cancelAnimationFrame(spinAnimation);
+                spinAnimation = null;
+            }
+            
+            const touch = e.touches[0];
+            const wheel = document.getElementById('spinWheel');
+            const rect = wheel.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            // حیسابکردنی گۆشە
+            const dx = touch.clientX - centerX;
+            const dy = touch.clientY - centerY;
+            let angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            lastSpinPosition = angle;
+            lastSpinTime = Date.now();
+            isSpinning = true;
+        }
+
+        function spinWheel(e) {
+            if (!isSpinPageActive || !isSpinning) return;
+            
+            e.preventDefault();
+            
+            const touch = e.touches[0];
+            const wheel = document.getElementById('spinWheel');
+            const rect = wheel.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            // حیسابکردنی گۆشەی نوێ
+            const dx = touch.clientX - centerX;
+            const dy = touch.clientY - centerY;
+            let angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            // حیسابکردنی جیاوازی گۆشە
+            let diff = angle - lastSpinPosition;
+            
+            // ڕاستکردنەوەی گۆشە کە لە -١٨٠ بۆ ١٨٠ بێت
+            if (diff > 180) diff -= 360;
+            if (diff < -180) diff += 360;
+            
+            // حیسابکردنی خێرایی
+            const now = Date.now();
+            const timeDiff = now - lastSpinTime;
+            if (timeDiff > 0) {
+                spinVelocity = diff / timeDiff * 15; // ڕێژەی خێرایی
+            }
+            
+            // نوێکردنەوەی گۆشە
+            spinAngle += diff;
+            wheel.style.transform = `rotate(${spinAngle}deg)`;
+            
+            // نوێکردنەوەی بۆکسی ئەنجام
+            updateResultDuringSpin();
+            
+            lastSpinPosition = angle;
+            lastSpinTime = now;
+        }
+
+        function updateResultDuringSpin() {
+            if (spinSegments.length === 0) return;
+            
+            // دیاریکردنی گۆشەی ڕێژەیی (0-360)
+            let normalizedAngle = spinAngle % 360;
+            if (normalizedAngle < 0) normalizedAngle += 360;
+            
+            // حیسابکردنی بەش (segment)
+            const segmentCount = spinSegments.length;
+            const anglePerSegment = 360 / segmentCount;
+            
+            // 270 پلە بەرامبەر نیشانەکەیە (لە لوتکەوە)
+            let pointerAngle = 270;
+            let diffAngle = (pointerAngle - normalizedAngle + 360) % 360;
+            
+            const segmentIndex = Math.floor(diffAngle / anglePerSegment);
+            const winnerIndex = segmentIndex % segmentCount;
+            
+            const currentName = spinSegments[winnerIndex];
+            document.getElementById('resultName').textContent = currentName;
+        }
+
+        function endSpin(e) {
+            if (!isSpinPageActive || !isSpinning) return;
+            
+            e.preventDefault();
+            isSpinning = false;
+            
+            // بەردەوامی دان بە جوڵە بەپێی خێرایی
+            function continueSpin() {
+                if (Math.abs(spinVelocity) < 0.01) {
+                    // چەرخەکە ڕاوەستا - دیاریکردنی ئەنجام
+                    calculateResult();
+                    return;
+                }
+                
+                // کەمکردنەوەی خێرایی (friction)
+                spinVelocity *= 0.97;
+                spinAngle += spinVelocity;
+                
+                const wheel = document.getElementById('spinWheel');
+                wheel.style.transform = `rotate(${spinAngle}deg)`;
+                
+                // نوێکردنەوەی بۆکسی ئەنجام لە کاتی جوڵەدا
+                updateResultDuringSpin();
+                
+                spinAnimation = requestAnimationFrame(continueSpin);
+            }
+            
+            spinAnimation = requestAnimationFrame(continueSpin);
+        }
+
+        function calculateResult() {
+            if (spinSegments.length === 0) return;
+            
+            // دیاریکردنی گۆشەی ڕێژەیی (0-360)
+            let normalizedAngle = spinAngle % 360;
+            if (normalizedAngle < 0) normalizedAngle += 360;
+            
+            // حیسابکردنی بەش (segment)
+            const segmentCount = spinSegments.length;
+            const anglePerSegment = 360 / segmentCount;
+            
+            // 270 پلە بەرامبەر نیشانەکەیە (لە لوتکەوە)
+            let pointerAngle = 270;
+            let diffAngle = (pointerAngle - normalizedAngle + 360) % 360;
+            
+            const segmentIndex = Math.floor(diffAngle / anglePerSegment);
+            const winnerIndex = segmentIndex % segmentCount;
+            
+            spinResult = spinSegments[winnerIndex];
+            document.getElementById('resultName').textContent = spinResult;
+        }
+
+        // ===== فانکشنەکانی کاتژمێر =====
+        function startTimer() {
+            timerSeconds = 300; // 5 خولەک
+            isTimerPaused = false;
+            updateTimerDisplay();
+            
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            timerInterval = setInterval(() => {
+                if (!isTimerPaused && timerSeconds > 0) {
+                    timerSeconds--;
+                    updateTimerDisplay();
+                    
+                    if (timerSeconds === 0) {
+                        stopTimer();
+                        showError('کات تەواو بوو!');
+                    }
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function togglePause() {
+            isTimerPaused = !isTimerPaused;
+            const pauseIcon = document.getElementById('pauseIcon');
+            const pauseText = document.getElementById('pauseText');
+            
+            if (isTimerPaused) {
+                pauseIcon.textContent = '▶️';
+                pauseText.textContent = 'دەستپێکردنەوەی کات';
+            } else {
+                pauseIcon.textContent = '⏸️';
+                pauseText.textContent = 'وەستاندنی کات';
+            }
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerSeconds / 60);
+            const seconds = timerSeconds % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('timerDisplay').textContent = display;
+        }
+
+        // ===== فانکشنەکانی دیالۆگ =====
+        function showRevealDialog() {
+            stopTimer();
+            openRevealPage();
+        }
+
+        function showResetConfirm() {
+            document.getElementById('confirmTitle').textContent = '🔄 دڵنیابوون';
+            document.getElementById('confirmMessage').textContent = 'ئایا تۆ دڵنیای دەتەوێت هەموو زانیاریەکان بسریتەوە و کۆتایی بەیاریەکە بهێنیت؟';
+            confirmCallback = function(confirmed) {
+                if (confirmed) {
+                    resetGame();
+                }
+                hideConfirmDialog();
+            };
+            document.getElementById('confirmDialog').style.display = 'flex';
+        }
+
+        function resetGame() {
+            stopTimer();
+            
+            // ڕێکخستنەوەی هەموو زانیاریەکان بۆ دۆخی سەرەتا
+            players = [];
+            playerPoints = {};
+            currentPlayerIndex = 0;
+            hasSeenCard = false;
+            isLocked = false;
+            spinResult = '';
+            spinAngle = 0;
+            
+            // نوێکردنەوەی دیسپلەی ناوەکان
+            document.getElementById('resultName').textContent = '-';
+            
+            // ڕێکخستنەوەی هەموو پەڕەکان
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'block';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            // ڕێکخستنەوەی بینراوی تاسک باڕی خوارەوە
+            document.getElementById('imposterBottomBar').style.display = 'flex';
+            document.getElementById('bottomNav').style.display = 'none';
+            
+            // ڕێکخستنەوەی کۆنتەینەری سەرەکی
+            const container = document.getElementById('mainContainer');
+            container.classList.add('no-bottom-bar');
+            container.classList.add('with-bottom-bar');
+            container.classList.remove('fullscreen');
+            container.style.padding = '0';
+            
+            // ڕێکخستنەوەی قەبارەی بەشەکانی پەڕەی ڕێنمایی
+            const videoSection = document.getElementById('videoSection');
+            const instructionsSection = document.getElementById('instructionsSection');
+            
+            if (videoSection && instructionsSection) {
+                videoSection.style.height = '50%';
+                instructionsSection.style.height = '50%';
+                currentHeight = 50;
+            }
+            
+            // ڕێکخستنەوەی ڕاژەکانی یاری
+            isImposterPageActive = true;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            
+            currentPage = 'imposter';
+            updateTaskbar();
+        }
+
+        function confirmAction(confirmed) {
+            if (confirmCallback) {
+                confirmCallback(confirmed);
+            }
+        }
+
+        function hideConfirmDialog() {
+            document.getElementById('confirmDialog').style.display = 'none';
+            confirmCallback = null;
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorDialog').style.display = 'flex';
+        }
+
+        function hideErrorDialog() {
+            document.getElementById('errorDialog').style.display = 'none';
+        }
+
+        // کۆنترۆڵکردنی جوڵەی پەنجە بۆ پەڕەی کێ فێڵبازە
+        document.addEventListener('touchmove', function(event) {
+            if (!isImposterPageActive) return;
+            
+            const instructionsSection = document.getElementById('instructionsSection');
+            const videoSection = document.getElementById('videoSection');
+            
+            if (!instructionsSection || !videoSection) return;
+            
+            const target = event.target;
+            const isTouchingInstructions = target.closest('.instructions-section') !== null;
+            
+            if (!isTouchingInstructions) return;
+            
+            const touch = event.touches[0];
+            const currentY = touch.clientY;
+            
+            if (startY === 0) {
+                startY = currentY;
+                return;
+            }
+            
+            const deltaY = startY - currentY;
+            
+            if (currentHeight >= maxHeight) {
+                if (deltaY < 0 && instructionsSection.scrollTop <= 0) {
+                    event.preventDefault();
+                    
+                    const windowHeight = window.innerHeight;
+                    const taskbarHeight = 70;
+                    const availableHeight = windowHeight - taskbarHeight;
+                    
+                    const heightChange = (deltaY / availableHeight) * 100;
+                    let newHeight = currentHeight + heightChange;
+                    
+                    if (newHeight < minHeight) {
+                        newHeight = minHeight;
+                    } else if (newHeight > maxHeight) {
+                        newHeight = maxHeight;
+                    }
+                    
+                    instructionsSection.style.height = newHeight + '%';
+                    videoSection.style.height = (100 - newHeight) + '%';
+                    currentHeight = newHeight;
+                    
+                    startY = currentY;
+                }
+                return;
+            }
+            
+            event.preventDefault();
+            
+            const windowHeight = window.innerHeight;
+            const taskbarHeight = 70;
+            const availableHeight = windowHeight - taskbarHeight;
+            
+            const heightChange = (deltaY / availableHeight) * 100;
+            let newHeight = currentHeight + heightChange;
+            
+            if (newHeight < minHeight) {
+                newHeight = minHeight;
+            } else if (newHeight > maxHeight) {
+                newHeight = maxHeight;
+            }
+            
+            instructionsSection.style.height = newHeight + '%';
+            videoSection.style.height = (100 - newHeight) + '%';
+            currentHeight = newHeight;
+            
+            startY = currentY;
+        }, { passive: false });
+
+        document.addEventListener('touchstart', function(event) {
+            if (!isImposterPageActive) return;
+            
+            const target = event.target;
+            const isTouchingInstructions = target.closest('.instructions-section') !== null;
+            
+            if (isTouchingInstructions) {
+                const touch = event.touches[0];
+                startY = touch.clientY;
+            }
+        });
+
+        document.addEventListener('touchend', function(event) {
+            if (!isImposterPageActive) return;
+            startY = 0;
+        });
+
+        function navigateTo(page, element) {
+            if (isImposterPageActive || isNextStepPageActive || isGamePlayPageActive || isDictatorPageActive || isStartFinalPageActive || isSpinPageActive || isGamePageActive || isRevealPageActive || isPointsDialogActive || isGameStartedPageActive) return;
+            
+            document.querySelectorAll('.nav-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (element) {
+                element.classList.add('active');
+            }
+
+            document.getElementById('gamesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'none';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+
+            switch(page) {
+                case 'games':
+                    document.getElementById('gamesPage').style.display = 'block';
+                    currentPage = 'games';
+                    break;
+                case 'leaderboard':
+                    document.getElementById('leaderboardPage').style.display = 'flex';
+                    currentPage = 'leaderboard';
+                    break;
+                case 'settings':
+                    document.getElementById('settingsPage').style.display = 'block';
+                    currentPage = 'settings';
+                    break;
+            }
+            
+            updateTaskbar();
+        }
+
+        function openGame(gameType) {
+            if (isImposterPageActive || isNextStepPageActive || isGamePlayPageActive || isDictatorPageActive || isStartFinalPageActive || isSpinPageActive || isGamePageActive || isRevealPageActive || isPointsDialogActive || isGameStartedPageActive) return;
+            
+            const gameNames = {
+                'tellme': 'پێم بڵێ',
+                'qa': 'پرسیار و وەڵام',
+                'handsigns': 'دەست و ئاماژە',
+                'predict': 'پێشبینی بکە',
+                'concan': 'کۆنکان',
+                'tawle': 'تاوڵە',
+                'monopoly': 'مۆنۆپۆلی',
+                'x_o': 'ئێکس و ئۆ',
+                'dame': 'دامە',
+                'domine': 'دۆمینە',
+                'uno': 'ئونۆ'
+            };
+            const gameName = gameNames[gameType] || gameType;
+            showError(`یاری "${gameName}" - بەم زووانە دەکرێتەوە ✨`);
+        }
+
+        function handleSetting(setting) {
+            if (isImposterPageActive || isNextStepPageActive || isGamePlayPageActive || isDictatorPageActive || isStartFinalPageActive || isSpinPageActive || isGamePageActive || isRevealPageActive || isPointsDialogActive || isGameStartedPageActive) return;
+            
+            const settingNames = {
+                'profile': 'پرۆفایل',
+                'app_settings': 'رێکخستنی بەرنامە',
+                'terms': 'مەرجەکانی یاریکەر',
+                'feedback': 'ڕاو بۆچوونەکان',
+                'languages': 'زمانەکان',
+                'exit': 'دەرچوون لە بەرنامە'
+            };
+            showError(`${settingNames[setting]} - بەم زووانە`);
+        }
+
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('mainContainer');
+            if (container) {
+                container.style.overflowY = 'auto';
+                container.style.webkitOverflowScrolling = 'touch';
+            }
+            
+            isImposterPageActive = false;
+            isNextStepPageActive = false;
+            isGamePlayPageActive = false;
+            isDictatorPageActive = false;
+            isStartFinalPageActive = false;
+            isSpinPageActive = false;
+            isGamePageActive = false;
+            isRevealPageActive = false;
+            isPointsDialogActive = false;
+            isGameStartedPageActive = false;
+            currentPage = 'games';
+            updateTaskbar();
+            
+            document.getElementById('gamesPage').style.display = 'block';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('imposterPage').style.display = 'none';
+            document.getElementById('nextStepPage').style.display = 'none';
+            document.getElementById('gamePlayPage').style.display = 'none';
+            document.getElementById('dictatorPage').style.display = 'none';
+            document.getElementById('startFinalPage').style.display = 'none';
+            document.getElementById('spinPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('revealPage').style.display = 'none';
+            document.getElementById('gameStartedPage').style.display = 'none';
+            
+            document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.nav-button')[0].classList.add('active');
+        });
+    </script>
+</body>
+</html>
